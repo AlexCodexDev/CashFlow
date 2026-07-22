@@ -1,4 +1,4 @@
 export interface CategoryIconFieldTypes {
-    value: string;
+    value?: string;
     onValueChange: (value: string) => void;
 }

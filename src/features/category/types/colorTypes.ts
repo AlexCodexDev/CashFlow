@@ -1,4 +1,4 @@
 export interface CategoryColorFieldTypes {
-    value: string;
+    value?: string;
     onValueChange: (value: string) => void;
 }

@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { CarFront, ChartNoAxesCombinedIcon, Ellipsis, Gift, GraduationCap, Handbag, Heart, Home, Utensils, Wallet } from "lucide-react";
 import { CategoryIconFieldTypes } from "../types/iconTypes";
 import { cn } from "@/lib/utils";
 import { categoryIcons } from "../constants/category-icons";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function CategoryIconField({ value, onValueChange }: CategoryIconFieldTypes) {
     const icons = [
@@ -64,16 +64,24 @@ export function CategoryIconField({ value, onValueChange }: CategoryIconFieldTyp
                 const Icon = item.icon;
 
                 return (
-                    <Button
-                        key={item.value}
-                        variant="outline"
-                        size="lg"
-                        className={cn("w-full h-14 rounded-sm", value === item.value ? "border-2 border-primary" : "")}
-                        title={item.tooltip}
-                        onClick={() => onValueChange(item.value)}
-                    >
-                        <Icon className="size-5" />
-                    </Button>
+                    <Tooltip>
+                        <TooltipTrigger
+                            render={<Button
+                                key={item.value}
+                                variant="outline"
+                                size="lg"
+                                className={cn("w-full h-14 rounded-sm", value === item.value ? "border-2 border-primary" : "")}
+                                title={item.tooltip}
+                                onClick={() => onValueChange(item.value)}
+                            >
+                                <Icon className="size-5" />
+                            </Button>}
+                        />
+                        <TooltipContent>
+                            {item.tooltip}
+                        </TooltipContent>
+                    </Tooltip>
+                    
                 );
             })}
         </>
