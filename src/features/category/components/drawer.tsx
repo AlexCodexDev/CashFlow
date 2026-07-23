@@ -2,11 +2,11 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } f
 import type { CategoryDrawerTypes } from "../types/drawerTypes";
 import { CategoryForm } from "./form";
 import { useQuery } from "@tanstack/react-query";
-import { getCategory, getCategoryByCode } from "@/services/category.service";
-import { ChartNoAxesColumnDecreasing } from "lucide-react";
+import { getCategoryByCode } from "@/services/category.service";
 
 export function CategoryDrawer({ open, onOpenChange, title, code }: CategoryDrawerTypes) {
-    const drawerDesc = title === "Create"
+    const option = title === "Create";
+    const drawerDesc = option
         ? "Add a new category to organize your transactions."
         : "Update your category information.";
 
@@ -15,8 +15,6 @@ export function CategoryDrawer({ open, onOpenChange, title, code }: CategoryDraw
         queryFn: () => getCategoryByCode(code!),
         enabled: !!code
     });
-
-    console.log(data);
 
     return (
         <Drawer
@@ -32,9 +30,8 @@ export function CategoryDrawer({ open, onOpenChange, title, code }: CategoryDraw
                 <div className="p-4 h-full">
                     <CategoryForm
                         onClose={() => onOpenChange(false)}
-                        data={data}
-                        flag={title}
-                        code={code}
+                        dataCat={data}
+                        mode={option ? "create" : "update" }
                     />
                 </div>
             </DrawerContent>

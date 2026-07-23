@@ -13,8 +13,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CategoryFormTypes } from "../types/formTypes";
 import { toast } from "sonner";
 import { createCategory, updateCategory } from "@/services/category.service";
+import { useEffect } from "react";
 
-export function CategoryForm({ onClose, data, flag, code }: CategoryFormTypes) {
+export function CategoryForm({ onClose, dataCat, mode }: CategoryFormTypes) {
     const form = useForm<CategoryFormData>({
         resolver: zodResolver(CategorySchema),
         defaultValues: {
@@ -28,11 +29,11 @@ export function CategoryForm({ onClose, data, flag, code }: CategoryFormTypes) {
 
     const onSubmit = async (data: CategoryFormData) => {
         try {
-            if(flag === "Create") {
+            if(mode === "create") {
                 const res = await createCategory(data);
                 toast.success(res.message);
             } else {
-                const res = await updateCategory(code || "", data);
+                const res = await updateCategory(dataCat.code, data);
                 toast.success(res.message);
             }
 
@@ -41,11 +42,23 @@ export function CategoryForm({ onClose, data, flag, code }: CategoryFormTypes) {
         } catch (error: any) {
             toast.error(error.message);
         }
-    }
+    };
+
+    useEffect(() => {
+        if(!dataCat) return;
+
+        form.reset({
+            name: dataCat.name,
+            description: dataCat.description ?? "",
+            color: dataCat.color ?? "",
+            icon: dataCat.icon ?? "",
+            isActive: dataCat.isActive
+        });
+    }, [dataCat, form]);
 
     return (
         <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit, (errors) => (console.log(errors)))}
             className="flex h-full flex-col"
         >
             <div className="flex-1 overflow-y-auto">

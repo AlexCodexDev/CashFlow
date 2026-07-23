@@ -64,7 +64,7 @@ export function CategoryIconField({ value, onValueChange }: CategoryIconFieldTyp
                 const Icon = item.icon;
 
                 return (
-                    <Tooltip>
+                    <Tooltip key={item.value}>
                         <TooltipTrigger
                             render={<Button
                                 key={item.value}

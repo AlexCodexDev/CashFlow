@@ -10,12 +10,15 @@ import { CustomTable } from "@/components/table";
 import { CategoryTypes } from "./types/category";
 import { Column } from "@/types/table";
 import { useQuery } from "@tanstack/react-query";
-import { getCategory } from "@/services/category.service";
+import { deleteCategory, getCategory } from "@/services/category.service";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CategoryFieldPreview } from "./components/preview";
+import { CustomDialog } from "@/components/dialog";
+import { toast } from "sonner";
 
 export function CategoryPage() {
     const [open, setOpen] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
     const [title, setTitle] = useState("");
     const [selectedCode, setSelectedCode] = useState("");
     const { data, isLoading } = useQuery({
@@ -69,9 +72,9 @@ export function CategoryPage() {
                                         variant="ghost"
                                         size="icon-lg"
                                         onClick={() => {
-                                            setOpen(true);
                                             setTitle("Update")
                                             setSelectedCode(row.code)
+                                            setOpen(true);
                                         }}
                                         className="transition-colors duration-200 ease-out hover:bg-warning/20"
                                     >
@@ -89,6 +92,10 @@ export function CategoryPage() {
                                     <Button
                                         variant="ghost"
                                         size="icon-lg"
+                                        onClick={() => {
+                                            setSelectedCode(row.code);
+                                            setOpenDialog(true);
+                                        }}
                                         className="transition-colors duration-200 ease-out hover:bg-danger/20"
                                     >
                                         <Trash2 className="text-danger" />
@@ -104,6 +111,19 @@ export function CategoryPage() {
             )
         },
     ];
+
+    const handleDelete = async () => {
+        if(!selectedCode) return;
+
+        try {
+            const res = await deleteCategory(selectedCode);
+
+            setOpenDialog(false);
+            toast.success(res.message);
+        } catch (error) {
+            toast.error("Something went wrong.");
+        }
+    }
 
     return (
         <section className="w-full h-full bg-white rounded-md">
@@ -127,8 +147,9 @@ export function CategoryPage() {
                         size="lg"
                         className="rounded-sm"
                         onClick={() => {
-                            setOpen(true);
                             setTitle("Create")
+                            setSelectedCode("")
+                            setOpen(true);
                         }}
                     >
                         <Plus data-icon="inline-start" />
@@ -149,6 +170,14 @@ export function CategoryPage() {
                 onOpenChange={setOpen}
                 title={title}
                 code={selectedCode}
+            />
+            <CustomDialog
+                open={openDialog}
+                onClose={() => setOpenDialog(false)}
+                title="Delete Confirmation"
+                subtitle={selectedCode}
+                description="Data will permanent deleted and cannot be retrive."
+                onConfirm={handleDelete}
             />
         </section>
     );

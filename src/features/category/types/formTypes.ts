@@ -1,6 +1,6 @@
+import { CategoryTypes } from "./category";
 export interface CategoryFormTypes {
     onClose: () => void;
-    data: CategoryFormTypes;
-    flag: string;
-    code?: string;
+    dataCat: CategoryTypes;
+    mode: "create" | "update";
 }

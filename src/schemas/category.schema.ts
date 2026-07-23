@@ -5,7 +5,7 @@ export const CategorySchema = z.object({
     description: z.string().trim().optional(),
     color: z.string().trim().optional(),
     icon: z.string().trim().optional(),
-    isActive: z.boolean()
+    isActive: z.boolean().optional()
 });
 
 export type CategoryFormData = z.infer<typeof CategorySchema>;

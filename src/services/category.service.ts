@@ -20,3 +20,8 @@ export async function updateCategory(code: string, data: CategoryFormData) {
     const response = await api.put(`/category/update/${code}`, data);
     return response.data;
 }
+
+export async function deleteCategory(code: string) {
+    const response = await api.delete(`/category/delete/${code}`);
+    return response.data;
+}

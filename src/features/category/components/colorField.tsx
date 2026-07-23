@@ -31,6 +31,7 @@ export function CategoryColorField({ value, onValueChange }: CategoryColorFieldT
         <>
             {colorList.map((item) => (
                 <Button
+                    key={item.color}
                     variant="default"
                     size="lg"
                     className={cn(item.color, "w-full", value === item.color ? "border-2 border-primary" : "", item.color === "bg-background" ? "border-primary" : "")}
