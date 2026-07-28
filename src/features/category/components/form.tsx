@@ -7,55 +7,101 @@ import { CategoryIconField } from "./iconField";
 import { CategoryColorField } from "./colorField";
 import { CategoryFieldPreview } from "./preview";
 import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { CategoryFormData, CategorySchema } from "@/schemas/category.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CategoryFormTypes } from "../types/formTypes";
 import { toast } from "sonner";
 import { createCategory, updateCategory } from "@/services/category.service";
-import { useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
-export function CategoryForm({ onClose, dataCat, mode }: CategoryFormTypes) {
+export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFormTypes) {
+    const queryClient = useQueryClient();
+
+    const createMutation = useMutation({
+        mutationFn: async (data: CategoryFormData) => {
+            setIsSaving(true);
+            return createCategory(data);
+        },
+        onSuccess: (res) => {
+            toast.success(res.message);
+
+            queryClient.invalidateQueries({
+                queryKey: ["category"]
+            });
+
+            form.reset();
+            onClose();
+        },
+        onSettled: () => {
+            setIsSaving(false);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: ({
+            code,
+            data
+        }: {
+            code: string,
+            data: CategoryFormData
+        }) => updateCategory(code, data),
+        onSuccess: (res) => {
+            toast.success(res.message);
+            
+            queryClient.invalidateQueries({
+                queryKey: ["Category"]
+            });
+
+            form.reset();
+            onClose();
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    })
+
     const form = useForm<CategoryFormData>({
         resolver: zodResolver(CategorySchema),
-        defaultValues: {
-            name: "",
-            description: "",
-            icon: "",
-            color: "",
+        values: {
+            name: dataCat?.name ?? "",
+            description: dataCat?.description ?? "",
+            icon: dataCat?.icon ?? "",
+            color: dataCat?.color ?? "",
             isActive: true,
         }
     });
 
     const onSubmit = async (data: CategoryFormData) => {
-        try {
-            if(mode === "create") {
-                const res = await createCategory(data);
-                toast.success(res.message);
-            } else {
-                const res = await updateCategory(dataCat.code, data);
-                toast.success(res.message);
-            }
-
-            form.reset();
-            onClose();
-        } catch (error: any) {
-            toast.error(error.message);
+        if (mode === "create") {
+            createMutation.mutate(data);
+        } else {
+            updateMutation.mutate({
+                code: dataCat.code,
+                data
+            });
         }
     };
 
-    useEffect(() => {
-        if(!dataCat) return;
+    const name = useWatch({
+        control: form.control,
+        name: "name"
+    });
 
-        form.reset({
-            name: dataCat.name,
-            description: dataCat.description ?? "",
-            color: dataCat.color ?? "",
-            icon: dataCat.icon ?? "",
-            isActive: dataCat.isActive
-        });
-    }, [dataCat, form]);
+    const icon = useWatch({
+        control: form.control,
+        name: "icon"
+    });
 
+    const color = useWatch({
+        control: form.control,
+        name: "color"
+    });
+    
     return (
         <form
             onSubmit={form.handleSubmit(onSubmit, (errors) => (console.log(errors)))}
@@ -81,14 +127,14 @@ export function CategoryForm({ onClose, dataCat, mode }: CategoryFormTypes) {
                                 placeholder="Enter description..."
                                 className="h-26"
                                 {...form.register("description")}
-                            ></Textarea>
+                            />
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="icon">Icon <span className="text-text-caption">(Optional)</span></FieldLabel>
                             <FieldDescription>Mark category with icon</FieldDescription>
                             <div className="grid grid-cols-5 gap-2">
                                 <CategoryIconField
-                                    value={form.watch("icon")}
+                                    value={icon}
                                     onValueChange={(value) => form.setValue("icon", value)}
                                 />
                             </div>
@@ -98,7 +144,7 @@ export function CategoryForm({ onClose, dataCat, mode }: CategoryFormTypes) {
                             <FieldDescription>Mark category with color</FieldDescription>
                             <div className="grid grid-cols-5 gap-2">
                                 <CategoryColorField
-                                    value={form.watch("color")}
+                                    value={color}
                                     onValueChange={(value) => form.setValue("color", value)}
                                 />
                             </div>
@@ -108,9 +154,9 @@ export function CategoryForm({ onClose, dataCat, mode }: CategoryFormTypes) {
                             <FieldDescription>Preview your category setup</FieldDescription>
                             <div className="border-2 p-5 rounded-sm">
                                 <CategoryFieldPreview
-                                    iconValue={form.watch("icon")}
-                                    colorValue={form.watch("color")}
-                                    categoryName={form.watch("name")}
+                                    iconValue={icon}
+                                    colorValue={color}
+                                    categoryName={name}
                                 />
                             </div>
                         </Field>
@@ -123,7 +169,13 @@ export function CategoryForm({ onClose, dataCat, mode }: CategoryFormTypes) {
                     type="submit"
                     size="lg"
                     title="Submit"
-                >Submit</Button>
+                    disabled={createMutation.isPending || updateMutation.isPending}
+                >
+                    {(createMutation.isPending || updateMutation.isPending) && (
+                        <Loader2 className="size-4 animate-spin" />
+                    )}
+                    Submit
+                </Button>
                 <Button
                     variant="outline"
                     type="button"
@@ -133,6 +185,7 @@ export function CategoryForm({ onClose, dataCat, mode }: CategoryFormTypes) {
                         onClose(),
                         form.reset()
                     }}
+                    disabled={createMutation.isPending || updateMutation.isPending}
                 >Cancel</Button>
             </div>
         </form>

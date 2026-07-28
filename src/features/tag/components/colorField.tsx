@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { TagColorTypes } from "../types/colorTypes";
 import { cn } from "@/lib/utils";
-import { CategoryColorFieldTypes } from "../types/colorTypes";
 
-export function CategoryColorField({ value, onValueChange }: CategoryColorFieldTypes) {
+export function TagColorField({ value, onValueChange }: TagColorTypes) {
     const colorList = [
         {
             color: "bg-background"

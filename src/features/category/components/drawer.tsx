@@ -3,6 +3,7 @@ import type { CategoryDrawerTypes } from "../types/drawerTypes";
 import { CategoryForm } from "./form";
 import { useQuery } from "@tanstack/react-query";
 import { getCategoryByCode } from "@/services/category.service";
+import { useState } from "react";
 
 export function CategoryDrawer({ open, onOpenChange, title, code }: CategoryDrawerTypes) {
     const option = title === "Create";
@@ -10,17 +11,22 @@ export function CategoryDrawer({ open, onOpenChange, title, code }: CategoryDraw
         ? "Add a new category to organize your transactions."
         : "Update your category information.";
 
-    const { data, isLoading } = useQuery({
+    const { data } = useQuery({
         queryKey: ["category", code],
         queryFn: () => getCategoryByCode(code!),
         enabled: !!code
     });
+    const [isSaving, setIsSaving] = useState(false);
 
     return (
         <Drawer
             open={open}
-            onOpenChange={onOpenChange}
+            onOpenChange={(value) => {
+                if(isSaving && !value) return;
+                onOpenChange(value);
+            }}
             swipeDirection="right"
+            disablePointerDismissal={!isSaving}
         >
             <DrawerContent className="w-3/12">
                 <DrawerHeader>
@@ -32,6 +38,7 @@ export function CategoryDrawer({ open, onOpenChange, title, code }: CategoryDraw
                         onClose={() => onOpenChange(false)}
                         dataCat={data}
                         mode={option ? "create" : "update" }
+                        setIsSaving={setIsSaving}
                     />
                 </div>
             </DrawerContent>

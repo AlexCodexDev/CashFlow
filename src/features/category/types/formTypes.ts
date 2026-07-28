@@ -3,4 +3,5 @@ export interface CategoryFormTypes {
     onClose: () => void;
     dataCat: CategoryTypes;
     mode: "create" | "update";
+    setIsSaving: (value: boolean) => void;
 }

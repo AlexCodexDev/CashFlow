@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/provider/query-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SocketProvider } from "@/provider/socket-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +38,9 @@ export default function RootLayout({
       <body className="min-h-dvh antialiased">
         <TooltipProvider>
           <QueryProvider>
-            {children}
+            <SocketProvider>
+              {children}
+            </SocketProvider>
           </QueryProvider>
         </TooltipProvider>
       </body>

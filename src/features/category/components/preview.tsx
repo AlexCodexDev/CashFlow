@@ -5,7 +5,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { Utensils } from "lucide-react";
 
 export function CategoryFieldPreview({ iconValue, colorValue, categoryName, iconSize, textSize, bgSize }: CategoryPreviewTypes) {
-    const PreviewIcon = categoryIcons[iconValue] ?? Utensils;
+    const icon = iconValue || "utensils";
+    const PreviewIcon = categoryIcons[icon] ?? Utensils;
     const previewName = categoryName || "Category Name";
     const previewColor = colorValue || "bg-background";
     const isDefault = previewColor === "bg-background";

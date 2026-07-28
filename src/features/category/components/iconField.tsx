@@ -68,6 +68,7 @@ export function CategoryIconField({ value, onValueChange }: CategoryIconFieldTyp
                         <TooltipTrigger
                             render={<Button
                                 key={item.value}
+                                type="button"
                                 variant="outline"
                                 size="lg"
                                 className={cn("w-full h-14 rounded-sm", value === item.value ? "border-2 border-primary" : "")}

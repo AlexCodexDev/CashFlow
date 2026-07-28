@@ -1,4 +1,4 @@
-import { ArrowDownCircle, ArrowUpCircle, BellRing, ChartColumn, FolderOpen, HandCoins, LayoutDashboard, PiggyBank, Wallet } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, BellRing, ChartColumn, Database, FolderOpen, HandCoins, LayoutDashboard, PiggyBank, Tag, Wallet } from "lucide-react";
 import type { SidebarItemTypes } from "@/types/sidebar";
 
 export const sidebarMenus: SidebarItemTypes[] = [
@@ -9,10 +9,24 @@ export const sidebarMenus: SidebarItemTypes[] = [
         description: "Welcome! Here's an overview of your financial activities."
     },
     {
-        title: "Category",
-        href: "/category",
-        icon: FolderOpen,
-        description: "Manage your income and expense categories."
+        title: "Master Data",
+        href: "/master-data",
+        icon: Database,
+        description: "",
+        children: [
+            {
+                title: "Category",
+                href: "/master-data/category",
+                icon: FolderOpen,
+                description: "Manage your income and expense categories."
+            },
+            {
+                title: "Tag",
+                href: "/master-data/tag",
+                icon: Tag,
+                description: "Organize your transactions with custom tags."
+            },
+        ]
     },
     {
         title: "Transactions",

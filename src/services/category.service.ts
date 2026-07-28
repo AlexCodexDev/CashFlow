@@ -1,8 +1,13 @@
 import api from "@/lib/axios";
 import { CategoryFormData } from "@/schemas/category.schema";
 
-export async function getCategory() {
-    const response = await api.get("/category/fetch");
+export async function getCategory(searchCode = "", searchName = "") {
+    const response = await api.get("/category/fetch", {
+        params: {
+            searchCode,
+            searchName
+        }
+    });
     return response.data;
 }
 

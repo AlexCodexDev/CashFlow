@@ -5,6 +5,4 @@ export interface CategoryTypes {
     color: string | null;
     icon: string | null;
     isActive: boolean;
-    createdAt: string;
-    updatedAt: string | null;
 }

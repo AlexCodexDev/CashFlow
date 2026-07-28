@@ -12,21 +12,11 @@ export function CustomDialog({ open, onClose, title, subtitle, description, onCo
                     <DialogTitle
                         className="font-semibold"
                     >{title}</DialogTitle>
-                    <DialogDescription
-                        className="flex flex-col"
-                    >
-                        <div>
-                            Code: {subtitle}
-                        </div>
-                        <div>
-                            {description}
-                        </div>
-                    </DialogDescription>
                 </DialogHeader>
-                    <div className="flex items-center gap-2">
-                        <div className="grid flex-1 gap-2">
-                        </div>  
-                    </div>
+                <div className="flex flex-col gap-1">
+                    <p>Code: {subtitle}</p>
+                    <p>{description}</p>
+                </div>
                 <DialogFooter className="sm:justify-start">
                     <Button type="button" className="bg-danger hover:bg-danger" onClick={onConfirm}>Delete</Button>
                     <DialogClose render={<Button type="button" variant="outline" onClick={onClose}>Close</Button>} />

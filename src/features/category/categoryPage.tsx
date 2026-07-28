@@ -9,21 +9,32 @@ import { useState } from "react";
 import { CustomTable } from "@/components/table";
 import { CategoryTypes } from "./types/category";
 import { Column } from "@/types/table";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteCategory, getCategory } from "@/services/category.service";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CategoryFieldPreview } from "./components/preview";
 import { CustomDialog } from "@/components/dialog";
 import { toast } from "sonner";
+import { useCategorySocket } from "@/hooks/useCategorySocket";
+import { useDebounce } from "@/hooks/use-debounce";
+import { SkeletonTable } from "@/components/skeletonTable";
 
 export function CategoryPage() {
+    const queryClient = useQueryClient();
+
     const [open, setOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
+    const [searchCode, setSearchCode] = useState("");
+    const [searchName, setSearchName] = useState("");
     const [title, setTitle] = useState("");
     const [selectedCode, setSelectedCode] = useState("");
+
+    const debouncedCode = useDebounce(searchCode, 500);
+    const debouncedName = useDebounce(searchName, 500);
+
     const { data, isLoading } = useQuery({
-        queryKey: ["categories"],
-        queryFn: getCategory
+        queryKey: ["category", debouncedCode, debouncedName],
+        queryFn: () => getCategory(debouncedCode, debouncedName)
     });
 
     const columns: Column<CategoryTypes>[] = [
@@ -72,8 +83,8 @@ export function CategoryPage() {
                                         variant="ghost"
                                         size="icon-lg"
                                         onClick={() => {
-                                            setTitle("Update")
-                                            setSelectedCode(row.code)
+                                            setTitle("Update");
+                                            setSelectedCode(row.code);
                                             setOpen(true);
                                         }}
                                         className="transition-colors duration-200 ease-out hover:bg-warning/20"
@@ -112,29 +123,54 @@ export function CategoryPage() {
         },
     ];
 
+    const deleteMutation = useMutation({
+        mutationFn: deleteCategory,
+        onSuccess: (res) => {
+            toast.success(res.message);
+
+            queryClient.invalidateQueries({
+                queryKey: ["category"]
+            });
+
+            setOpenDialog(false);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
+
     const handleDelete = async () => {
         if(!selectedCode) return;
 
-        try {
-            const res = await deleteCategory(selectedCode);
-
-            setOpenDialog(false);
-            toast.success(res.message);
-        } catch (error) {
-            toast.error("Something went wrong.");
-        }
+        deleteMutation.mutate(selectedCode);
     }
+
+    useCategorySocket();
 
     return (
         <section className="w-full h-full bg-white rounded-md">
             <div className="flex-1 px-10 py-7 flex justify-between">
-                <div>
+                <div className="flex gap-1.5">
                     <Field>
                         <InputGroup className="h-12 rounded-sm">
                             <InputGroupInput
                                 type="text"
-                                id="search-category"
-                                placeholder="Search category..."
+                                id="search-code-category"
+                                placeholder="Search category code..."
+                                onChange={(e) => setSearchCode(e.target.value)}
+                            />
+                            <InputGroupAddon align="inline-end">
+                                <Search />
+                            </InputGroupAddon>
+                        </InputGroup>
+                    </Field>
+                    <Field>
+                        <InputGroup className="h-12 rounded-sm">
+                            <InputGroupInput
+                                type="text"
+                                id="search-name-category"
+                                placeholder="Search category name..."
+                                onChange={(e) => setSearchName(e.target.value)}
                             />
                             <InputGroupAddon align="inline-end">
                                 <Search />
@@ -158,11 +194,15 @@ export function CategoryPage() {
                 </div>
             </div>
             <div className="flex-2 px-10">
-                <CustomTable
-                    columns={columns}
-                    data={data ?? []}
-                    rowKey="code"
-                />
+                {isLoading ? (
+                    <SkeletonTable />
+                ) : (
+                    <CustomTable
+                        columns={columns}
+                        data={data ?? []}
+                        rowKey="code"
+                    />
+                )}
             </div>
 
             <CategoryDrawer
