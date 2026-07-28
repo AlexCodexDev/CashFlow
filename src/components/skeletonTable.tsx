@@ -1,5 +1,4 @@
-import { Table } from "lucide-react";
-import { TableBody, TableCell, TableRow } from "./ui/table";
+import { Table, TableBody, TableCell, TableRow } from "./ui/table";
 import { Skeleton } from "./ui/skeleton";
 
 export function SkeletonTable() {

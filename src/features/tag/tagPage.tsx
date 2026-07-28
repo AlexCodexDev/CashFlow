@@ -13,6 +13,7 @@ import { SkeletonTable } from "@/components/skeletonTable";
 import { useQuery } from "@tanstack/react-query";
 import { CustomTable } from "@/components/table";
 import { getTag } from "@/services/tag.service";
+import { TagDrawer } from "./components/drawer";
 
 export function TagPage() {
     const [open, setOpen] = useState(false);
@@ -150,7 +151,7 @@ export function TagPage() {
                         }}
                     >
                         <Plus data-icon="inline-start" />
-                        Add Category
+                        Add Tag
                     </Button>
                 </div>
             </div>
@@ -166,20 +167,20 @@ export function TagPage() {
                 )}
             </div>
 
-            <CategoryDrawer
+            <TagDrawer
                 open={open}
                 onOpenChange={setOpen}
                 title={title}
                 code={selectedCode}
             />
-            <CustomDialog
+            {/* <CustomDialog
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}
                 title="Delete Confirmation"
                 subtitle={selectedCode}
                 description="Data will permanent deleted and cannot be retrive."
                 onConfirm={handleDelete}
-            />
+            /> */}
         </section>
     )
 }
