@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "motion/react";
+import { Tag } from "lucide-react";
 import { TagPreviewTypes } from "../types/previewTypes";
+import { cn } from "@/lib/utils";
 
 export function TagFieldPreview({ colorValue, tagName, bgSize, textSize }: TagPreviewTypes) {
     const previewName = tagName || "Tag Name";
@@ -10,19 +10,8 @@ export function TagFieldPreview({ colorValue, tagName, bgSize, textSize }: TagPr
 
     return (
         <div className="flex gap-3 items-center">
-            {/* <div className={cn(bgColorSize, "flex items-center justify-center rounded-full transition-all duration-300", previewColor)}> */}
-                {/* <AnimatePresence mode="wait">
-                    <motion.div
-                        key={"default"}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                    </motion.div>
-                </AnimatePresence> */}
-            {/* </div> */}
-            <div className={txtSize}>
+            <div className={cn("flex gap-2 items-center", txtSize)}>
+                <Tag className={cn(previewColor, "transition-all duration-300")} />
                 {previewName}
             </div>
         </div>

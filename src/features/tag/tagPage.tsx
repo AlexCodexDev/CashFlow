@@ -10,22 +10,31 @@ import { TagTypes } from "./types/tag";
 import { TagFieldPreview } from "./components/preview";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { SkeletonTable } from "@/components/skeletonTable";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CustomTable } from "@/components/table";
-import { getTag } from "@/services/tag.service";
+import { deleteTag, getTag } from "@/services/tag.service";
 import { TagDrawer } from "./components/drawer";
+import { CustomDialog } from "@/components/dialog";
+import { toast } from "sonner";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export function TagPage() {
+    const queryClient = useQueryClient();
+
     const [open, setOpen] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
 
     const [searchCode, setSearchCode] = useState("");
     const [searchName, setSearchName] = useState("");
     const [title, setTitle] = useState("");
     const [selectedCode, setSelectedCode] = useState("");
 
+    const debouncedCode = useDebounce(searchCode, 500);
+    const debouncedName = useDebounce(searchName, 500);
+
     const { data, isLoading } = useQuery({
-        queryKey: ["tag"],
-        queryFn: () => getTag()
+        queryKey: ["tag", debouncedCode, debouncedName],
+        queryFn: () => getTag(debouncedCode, debouncedName)
     });
 
     const columns: Column<TagTypes>[] = [
@@ -53,9 +62,9 @@ export function TagPage() {
             key: "description",
             title: "Description",
             className: "font-bold",
-            render: (row) => {
+            render: (row) => (
                 row.description || "-"
-            }
+            )
         },
         {
             key: "action",
@@ -92,7 +101,7 @@ export function TagPage() {
                                     size="icon-lg"
                                     onClick={() => {
                                         setSelectedCode(row.code);
-                                        setOpen(true);
+                                        setOpenDialog(true);
                                     }}
                                     className="transition-colors duration-200 ease-out hover:bg-danger/20"
                                 >
@@ -108,6 +117,25 @@ export function TagPage() {
             )
         }
     ];
+
+    const deleteMutation = useMutation({
+        mutationFn: async (code: string) => deleteTag(code),
+        onSuccess: (res) => {
+            queryClient.invalidateQueries({
+                queryKey: ["tag"],
+            });
+            
+            toast.success(res.message);
+            setOpenDialog(false);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
+
+    const handleDelete = async () => {
+        deleteMutation.mutate(selectedCode);
+    }
 
     return (
         <section className="w-full h-full bg-white rounded-md">
@@ -173,14 +201,14 @@ export function TagPage() {
                 title={title}
                 code={selectedCode}
             />
-            {/* <CustomDialog
+            <CustomDialog
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}
                 title="Delete Confirmation"
                 subtitle={selectedCode}
                 description="Data will permanent deleted and cannot be retrive."
                 onConfirm={handleDelete}
-            /> */}
+            />
         </section>
     )
 }

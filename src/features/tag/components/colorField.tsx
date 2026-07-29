@@ -5,25 +5,32 @@ import { cn } from "@/lib/utils";
 export function TagColorField({ value, onValueChange }: TagColorTypes) {
     const colorList = [
         {
-            color: "bg-background"
+            color: "text-background",
+            bgColor: "bg-background"
         },
         {
-            color: "bg-success"
+            color: "text-success",
+            bgColor: "bg-success"
         },
         {
-            color: "bg-warning"
+            color: "text-warning",
+            bgColor: "bg-warning"
         },
         {
-            color: "bg-danger"
+            color: "text-danger",
+            bgColor: "bg-danger"
         },
         {
-            color: "bg-info"
+            color: "text-info",
+            bgColor: "bg-info"
         },
         {
-            color: "bg-foreground"
+            color: "text-foreground",
+            bgColor: "bg-foreground"
         },
         {
-            color: "bg-text-body"
+            color: "text-text-body",
+            bgColor: "bg-text-body"
         }
     ]
 
@@ -35,7 +42,7 @@ export function TagColorField({ value, onValueChange }: TagColorTypes) {
                     type="button"
                     variant="default"
                     size="lg"
-                    className={cn(item.color, "w-full", value === item.color ? "border-2 border-primary" : "", item.color === "bg-background" ? "border-primary" : "")}
+                    className={cn(item.bgColor, "w-full", value === item.color ? "border-2 border-primary" : "", item.color === "bg-background" ? "border-primary" : "")}
                     onClick={() => onValueChange(item.color)}
                 ></Button>
             ))}

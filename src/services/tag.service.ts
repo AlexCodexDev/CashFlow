@@ -1,8 +1,13 @@
 import api from "@/lib/axios";
 import { TagFormData } from "@/schemas/tag.schema";
 
-export async function getTag() {
-    const response = await api.get("/tag/fetch");
+export async function getTag(searchCode = "", searchName = "") {
+    const response = await api.get("/tag/fetch", {
+        params: {
+            searchCode,
+            searchName
+        }
+    });
     return response.data;
 }
 
@@ -22,6 +27,6 @@ export async function updateTag(code: string, data: TagFormData) {
 }
 
 export async function deleteTag(code: string) {
-    const response = await api.delete(`/tag/delete/${code}`);
+    const response = await api.put(`/tag/delete/${code}`);
     return response.data;
 }

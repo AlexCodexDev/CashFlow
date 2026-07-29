@@ -9,9 +9,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { TagFormData, TagSchema } from "@/schemas/tag.schema";
 import { TagFormTypes } from "../types/formTypes";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createTag } from "@/services/tag.service";
+import { createTag, updateTag } from "@/services/tag.service";
 import { toast } from "sonner";
-import { updateCategory } from "@/services/category.service";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { TagFieldPreview } from "./preview";
 
 export function TagForm({onClose, dataTag, mode, setIsSaving}: TagFormTypes) {
     const queryClient = useQueryClient();
@@ -22,12 +24,11 @@ export function TagForm({onClose, dataTag, mode, setIsSaving}: TagFormTypes) {
             return createTag(data);
         },
         onSuccess: (res) => {
-            toast.success(res.message);
-
             queryClient.invalidateQueries({
                 queryKey: ["tag"]
             });
-
+            
+            toast.success(res.message);
             form.reset();
             onClose();
         },
@@ -46,14 +47,13 @@ export function TagForm({onClose, dataTag, mode, setIsSaving}: TagFormTypes) {
         }: {
             code: string,
             data: TagFormData
-        }) => updateCategory(code, data),
+        }) => updateTag(code, data),
         onSuccess: (res) => {
-            toast.success(res.message);
-
             queryClient.invalidateQueries({
                 queryKey: ["tag"]
             });
-
+            
+            toast.success(res.message);
             form.reset();
             onClose();
         },
@@ -127,11 +127,44 @@ export function TagForm({onClose, dataTag, mode, setIsSaving}: TagFormTypes) {
                                 <TagColorField value={color} onValueChange={(value) => form.setValue("color", value)} />
                             </div>
                         </Field>
+                        <Field>
+                            <FieldLabel htmlFor="preview">Preview</FieldLabel>
+                            <FieldDescription>Preview your tag setup</FieldDescription>
+                            <div className="border-2 p-5 rounded-sm">
+                                <TagFieldPreview
+                                    colorValue={color}
+                                    tagName={name}
+                                />
+                            </div>
+                        </Field>
                     </FieldGroup>
                 </FieldSet>
             </div>
 
-            
+            <div className="flex flex-col justify-between gap-2">
+                <Button
+                    type="submit"
+                    size="lg"
+                    title="Submit"
+                    disabled={createMutation.isPending || updateMutation.isPending}
+                >
+                    {(createMutation.isPending || updateMutation.isPending) && (
+                        <Loader2 className="size-4 animation-spin" />
+                    )}
+                    Submit
+                </Button>
+                <Button
+                    variant="outline"
+                    type="button"
+                    size="lg"
+                    title="Cancel"
+                    onClick={() => {
+                        onClose(),
+                        form.reset()
+                    }}
+                    disabled={createMutation.isPending || updateMutation.isPending}
+                >Cancel</Button>
+            </div>
         </form>
     );
 }
