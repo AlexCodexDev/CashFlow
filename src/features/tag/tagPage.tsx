@@ -17,6 +17,7 @@ import { TagDrawer } from "./components/drawer";
 import { CustomDialog } from "@/components/dialog";
 import { toast } from "sonner";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useTagSocket } from "@/hooks/useTagSocket";
 
 export function TagPage() {
     const queryClient = useQueryClient();
@@ -136,6 +137,8 @@ export function TagPage() {
     const handleDelete = async () => {
         deleteMutation.mutate(selectedCode);
     }
+
+    useTagSocket();
 
     return (
         <section className="w-full h-full bg-white rounded-md">

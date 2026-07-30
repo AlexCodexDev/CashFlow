@@ -107,6 +107,7 @@ export function TagForm({onClose, dataTag, mode, setIsSaving}: TagFormTypes) {
                                 id="name"
                                 autoComplete="off"
                                 placeholder="Enter name..."
+                                required
                                 className="h-12"
                                 {...form.register("name")}
                             />

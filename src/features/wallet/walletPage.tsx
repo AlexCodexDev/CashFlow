@@ -4,22 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Pencil, Plus, Search, Trash2 } from "lucide-react";
-import { CategoryDrawer } from "./components/drawer";
 import { useState } from "react";
 import { CustomTable } from "@/components/table";
-import { CategoryTypes } from "./types/category";
 import { Column } from "@/types/table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteCategory, getCategory } from "@/services/category.service";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { CategoryFieldPreview } from "./components/preview";
 import { CustomDialog } from "@/components/dialog";
 import { toast } from "sonner";
-import { useCategorySocket } from "@/hooks/useCategorySocket";
 import { useDebounce } from "@/hooks/use-debounce";
 import { SkeletonTable } from "@/components/skeletonTable";
+import { WalletTypes } from "./types/wallet";
+import { deleteWallet, getWallet } from "@/services/wallet.service";
+import { useWalletSocket } from "@/hooks/useWalletSocket";
+import { WalletDrawer } from "./components/drawer";
 
-export function CategoryPage() {
+export function WalletPage() {
     const queryClient = useQueryClient();
 
     const [open, setOpen] = useState(false);
@@ -33,11 +32,11 @@ export function CategoryPage() {
     const debouncedName = useDebounce(searchName, 500);
 
     const { data, isLoading } = useQuery({
-        queryKey: ["category", debouncedCode, debouncedName],
-        queryFn: () => getCategory(debouncedCode, debouncedName)
+        queryKey: ["wallet", debouncedCode, debouncedName],
+        queryFn: () => getWallet(debouncedCode, debouncedName)
     });
 
-    const columns: Column<CategoryTypes>[] = [
+    const columns: Column<WalletTypes>[] = [
         {
             key: "code",
             title: "Code",
@@ -46,20 +45,7 @@ export function CategoryPage() {
         {
             key: "name",
             title: "Name",
-            className: "font-bold",
-            render: (row) => (
-                <>
-                    <CategoryFieldPreview
-                        iconValue={row.icon || "Utensils"}
-                        colorValue={row.color || "bg-background"}
-                        categoryName={row.name}
-                        bgSize="h-10 w-10"
-                        iconSize="size-4"
-                        textSize="text-md font-normal"
-                    />
-                </>
-            )
-
+            className: "font-bold"
         },
         {
             key: "description",
@@ -94,7 +80,7 @@ export function CategoryPage() {
                                 }
                             />
                             <TooltipContent>
-                                Update Category
+                                Update Wallet
                             </TooltipContent>
                         </Tooltip>
                         <Tooltip>
@@ -114,7 +100,7 @@ export function CategoryPage() {
                                 }
                             />
                             <TooltipContent>
-                                Delete Category
+                                Delete Wallet
                             </TooltipContent>
                         </Tooltip>
                     </div>
@@ -124,12 +110,12 @@ export function CategoryPage() {
     ];
 
     const deleteMutation = useMutation({
-        mutationFn: deleteCategory,
+        mutationFn: deleteWallet,
         onSuccess: (res) => {
             toast.success(res.message);
 
             queryClient.invalidateQueries({
-                queryKey: ["category"]
+                queryKey: ["wallet"]
             });
 
             setOpenDialog(false);
@@ -145,7 +131,7 @@ export function CategoryPage() {
         deleteMutation.mutate(selectedCode);
     }
 
-    useCategorySocket();
+    useWalletSocket();
 
     return (
         <section className="w-full h-full bg-white rounded-md">
@@ -155,8 +141,8 @@ export function CategoryPage() {
                         <InputGroup className="h-12 rounded-sm">
                             <InputGroupInput
                                 type="text"
-                                id="search-code-category"
-                                placeholder="Search category code..."
+                                id="search-code-wallet"
+                                placeholder="Search wallet code..."
                                 onChange={(e) => setSearchCode(e.target.value)}
                             />
                             <InputGroupAddon align="inline-end">
@@ -168,8 +154,8 @@ export function CategoryPage() {
                         <InputGroup className="h-12 rounded-sm">
                             <InputGroupInput
                                 type="text"
-                                id="search-name-category"
-                                placeholder="Search category name..."
+                                id="search-name-wallet"
+                                placeholder="Search wallet name..."
                                 onChange={(e) => setSearchName(e.target.value)}
                             />
                             <InputGroupAddon align="inline-end">
@@ -189,7 +175,7 @@ export function CategoryPage() {
                         }}
                     >
                         <Plus data-icon="inline-start" />
-                        Add Category
+                        Add Wallet
                     </Button>
                 </div>
             </div>
@@ -205,7 +191,7 @@ export function CategoryPage() {
                 )}
             </div>
 
-            <CategoryDrawer
+            <WalletDrawer
                 open={open}
                 onOpenChange={setOpen}
                 title={title}

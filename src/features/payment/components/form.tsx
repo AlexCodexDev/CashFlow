@@ -3,30 +3,30 @@
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { CategoryIconField } from "./iconField";
-import { CategoryColorField } from "./colorField";
-import { CategoryFieldPreview } from "./preview";
 import { Button } from "@/components/ui/button";
 import { useForm, useWatch } from "react-hook-form";
-import { CategoryFormData, CategorySchema } from "@/schemas/category.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CategoryFormTypes } from "../types/formTypes";
 import { toast } from "sonner";
-import { createCategory, updateCategory } from "@/services/category.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { PaymentFormTypes } from "../types/formTypes";
+import { PaymentFormData, PaymentSchema } from "@/schemas/payment.schema";
+import { createPayment, updatePayment } from "@/services/payment.service";
+import { PaymentIconField } from "./iconField";
+import { PaymentColorField } from "./colorField";
+import { PaymentFieldPreview } from "./preview";
 
-export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFormTypes) {
+export function PaymentForm({ onClose, dataPay, mode, setIsSaving }: PaymentFormTypes) {
     const queryClient = useQueryClient();
 
     const createMutation = useMutation({
-        mutationFn: async (data: CategoryFormData) => {
+        mutationFn: async (data: PaymentFormData) => {
             setIsSaving(true);
-            return createCategory(data);
+            return createPayment(data);
         },
         onSuccess: (res) => {
             queryClient.invalidateQueries({
-                queryKey: ["category"]
+                queryKey: ["payment"]
             });
             
             toast.success(res.message);
@@ -47,11 +47,11 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
             data
         }: {
             code: string,
-            data: CategoryFormData
-        }) => updateCategory(code, data),
+            data: PaymentFormData
+        }) => updatePayment(code, data),
         onSuccess: (res) => {
             queryClient.invalidateQueries({
-                queryKey: ["Category"]
+                queryKey: ["payment"]
             });
             
             toast.success(res.message);
@@ -63,23 +63,23 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
         }
     })
 
-    const form = useForm<CategoryFormData>({
-        resolver: zodResolver(CategorySchema),
+    const form = useForm<PaymentFormData>({
+        resolver: zodResolver(PaymentSchema),
         values: {
-            name: dataCat?.name ?? "",
-            description: dataCat?.description ?? "",
-            icon: dataCat?.icon ?? "",
-            color: dataCat?.color ?? "",
+            name: dataPay?.name ?? "",
+            color: dataPay?.color ?? "",
+            icon: dataPay?.icon ?? "",
+            description: dataPay?.description ?? "",
             isActive: true,
         }
     });
 
-    const onSubmit = async (data: CategoryFormData) => {
+    const onSubmit = async (data: PaymentFormData) => {
         if (mode === "create") {
             createMutation.mutate(data);
         } else {
             updateMutation.mutate({
-                code: dataCat.code,
+                code: dataPay.code,
                 data
             });
         }
@@ -99,7 +99,7 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
         control: form.control,
         name: "color"
     });
-    
+
     return (
         <form
             onSubmit={form.handleSubmit(onSubmit, (errors) => (console.log(errors)))}
@@ -113,8 +113,8 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
                             <Input
                                 id="name"
                                 autoComplete="off"
-                                required
                                 placeholder="Enter name..."
+                                required
                                 className="h-12"
                                 {...form.register("name")}
                             />
@@ -130,9 +130,9 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="icon">Icon <span className="text-text-caption">(Optional)</span></FieldLabel>
-                            <FieldDescription>Mark category with icon</FieldDescription>
+                            <FieldDescription>Mark payment with icon</FieldDescription>
                             <div className="grid grid-cols-5 gap-2">
-                                <CategoryIconField
+                                <PaymentIconField
                                     value={icon}
                                     onValueChange={(value) => form.setValue("icon", value)}
                                 />
@@ -140,9 +140,9 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="color">Color <span className="text-text-caption">(Optional)</span></FieldLabel>
-                            <FieldDescription>Mark category with color</FieldDescription>
+                            <FieldDescription>Mark payment with color</FieldDescription>
                             <div className="grid grid-cols-5 gap-2">
-                                <CategoryColorField
+                                <PaymentColorField
                                     value={color}
                                     onValueChange={(value) => form.setValue("color", value)}
                                 />
@@ -150,12 +150,12 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="preview">Preview</FieldLabel>
-                            <FieldDescription>Preview your category setup</FieldDescription>
+                            <FieldDescription>Preview your payment setup</FieldDescription>
                             <div className="border-2 p-5 rounded-sm">
-                                <CategoryFieldPreview
+                                <PaymentFieldPreview
                                     iconValue={icon}
                                     colorValue={color}
-                                    categoryName={name}
+                                    paymentName={name}
                                 />
                             </div>
                         </Field>

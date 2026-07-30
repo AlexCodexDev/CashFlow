@@ -4,22 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Pencil, Plus, Search, Trash2 } from "lucide-react";
-import { CategoryDrawer } from "./components/drawer";
 import { useState } from "react";
 import { CustomTable } from "@/components/table";
-import { CategoryTypes } from "./types/category";
 import { Column } from "@/types/table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteCategory, getCategory } from "@/services/category.service";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { CategoryFieldPreview } from "./components/preview";
 import { CustomDialog } from "@/components/dialog";
 import { toast } from "sonner";
-import { useCategorySocket } from "@/hooks/useCategorySocket";
 import { useDebounce } from "@/hooks/use-debounce";
 import { SkeletonTable } from "@/components/skeletonTable";
+import { PaymentTypes } from "./types/payment";
+import { PaymentFieldPreview } from "./components/preview";
+import { deletePayment, getPayment } from "@/services/payment.service";
+import { usePaymentSocket } from "@/hooks/usePaymentSocket";
+import { PaymentDrawer } from "./components/drawer";
 
-export function CategoryPage() {
+export function PaymentPage() {
     const queryClient = useQueryClient();
 
     const [open, setOpen] = useState(false);
@@ -33,11 +33,11 @@ export function CategoryPage() {
     const debouncedName = useDebounce(searchName, 500);
 
     const { data, isLoading } = useQuery({
-        queryKey: ["category", debouncedCode, debouncedName],
-        queryFn: () => getCategory(debouncedCode, debouncedName)
+        queryKey: ["payment", debouncedCode, debouncedName],
+        queryFn: () => getPayment(debouncedCode, debouncedName)
     });
 
-    const columns: Column<CategoryTypes>[] = [
+    const columns: Column<PaymentTypes>[] = [
         {
             key: "code",
             title: "Code",
@@ -49,10 +49,10 @@ export function CategoryPage() {
             className: "font-bold",
             render: (row) => (
                 <>
-                    <CategoryFieldPreview
-                        iconValue={row.icon || "Utensils"}
+                    <PaymentFieldPreview
+                        iconValue={row.icon || "Coins"}
                         colorValue={row.color || "bg-background"}
-                        categoryName={row.name}
+                        paymentName={row.name}
                         bgSize="h-10 w-10"
                         iconSize="size-4"
                         textSize="text-md font-normal"
@@ -94,7 +94,7 @@ export function CategoryPage() {
                                 }
                             />
                             <TooltipContent>
-                                Update Category
+                                Update Payment
                             </TooltipContent>
                         </Tooltip>
                         <Tooltip>
@@ -114,7 +114,7 @@ export function CategoryPage() {
                                 }
                             />
                             <TooltipContent>
-                                Delete Category
+                                Delete Payment
                             </TooltipContent>
                         </Tooltip>
                     </div>
@@ -124,12 +124,12 @@ export function CategoryPage() {
     ];
 
     const deleteMutation = useMutation({
-        mutationFn: deleteCategory,
+        mutationFn: deletePayment,
         onSuccess: (res) => {
             toast.success(res.message);
 
             queryClient.invalidateQueries({
-                queryKey: ["category"]
+                queryKey: ["payment"]
             });
 
             setOpenDialog(false);
@@ -145,7 +145,7 @@ export function CategoryPage() {
         deleteMutation.mutate(selectedCode);
     }
 
-    useCategorySocket();
+    usePaymentSocket();
 
     return (
         <section className="w-full h-full bg-white rounded-md">
@@ -155,8 +155,8 @@ export function CategoryPage() {
                         <InputGroup className="h-12 rounded-sm">
                             <InputGroupInput
                                 type="text"
-                                id="search-code-category"
-                                placeholder="Search category code..."
+                                id="search-code-payment"
+                                placeholder="Search payment code..."
                                 onChange={(e) => setSearchCode(e.target.value)}
                             />
                             <InputGroupAddon align="inline-end">
@@ -168,8 +168,8 @@ export function CategoryPage() {
                         <InputGroup className="h-12 rounded-sm">
                             <InputGroupInput
                                 type="text"
-                                id="search-name-category"
-                                placeholder="Search category name..."
+                                id="search-name-payment"
+                                placeholder="Search payment name..."
                                 onChange={(e) => setSearchName(e.target.value)}
                             />
                             <InputGroupAddon align="inline-end">
@@ -189,7 +189,7 @@ export function CategoryPage() {
                         }}
                     >
                         <Plus data-icon="inline-start" />
-                        Add Category
+                        Add Payment
                     </Button>
                 </div>
             </div>
@@ -205,7 +205,7 @@ export function CategoryPage() {
                 )}
             </div>
 
-            <CategoryDrawer
+            <PaymentDrawer
                 open={open}
                 onOpenChange={setOpen}
                 title={title}

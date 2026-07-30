@@ -1,4 +1,4 @@
-import { ArrowDownCircle, ArrowUpCircle, BellRing, ChartColumn, Database, FolderOpen, HandCoins, LayoutDashboard, PiggyBank, Tag, Wallet } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, BellRing, ChartColumn, CircleDollarSign, Contact, Database, FolderOpen, HandCoins, Landmark, LayoutDashboard, PiggyBank, Tag, Wallet } from "lucide-react";
 import type { SidebarItemTypes } from "@/types/sidebar";
 
 export const sidebarMenus: SidebarItemTypes[] = [
@@ -26,12 +26,30 @@ export const sidebarMenus: SidebarItemTypes[] = [
                 icon: Tag,
                 description: "Organize your transactions with custom tags."
             },
+            {
+                title: "Payment",
+                href: "/master-data/payment",
+                icon: CircleDollarSign,
+                description: "Organize your transactions with custom payments."
+            },
+            {
+                title: "Wallet",
+                href: "/master-data/wallet",
+                icon: Wallet,
+                description: "Organize your transactions with custom wallets."
+            },
+            {
+                title: "Contact",
+                href: "/master-data/contact",
+                icon: Contact,
+                description: "Organize your transactions with custom contacts."
+            }
         ]
     },
     {
         title: "Transactions",
         href: "/transactions",
-        icon: Wallet,
+        icon: Landmark,
         description: "",
         children: [
             {
