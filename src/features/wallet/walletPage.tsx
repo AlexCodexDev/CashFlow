@@ -48,6 +48,14 @@ export function WalletPage() {
             className: "font-bold"
         },
         {
+            key: "paymentCode",
+            title: "Payment",
+            className: "font-bold",
+            render: (row) => (
+                row.payment?.name || "-"
+            )
+        },
+        {
             key: "description",
             title: "Description",
             className: "font-bold",

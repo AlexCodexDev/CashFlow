@@ -1,6 +1,11 @@
 import api from "@/lib/axios";
 import { PaymentFormData } from "@/schemas/payment.schema";
 
+export async function getOptions() {
+    const response = await api.get("/payment/options");
+    return response.data;
+}
+
 export async function getPayment(searchCode = "", searchName = "") {
     const response = await api.get("/payment/fetch", {
         params: {

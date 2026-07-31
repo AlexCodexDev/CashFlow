@@ -1,21 +1,27 @@
 "use client";
 
-import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { WalletFormTypes } from "../types/formTypes";
 import { WalletFormData, WalletSchema } from "@/schemas/wallet.schema";
 import { createWallet, updateWallet } from "@/services/wallet.service";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getOptions } from "@/services/payment.service";
 
 export function WalletForm({ onClose, dataWal, mode, setIsSaving }: WalletFormTypes) {
     const queryClient = useQueryClient();
+
+    const { data: dataSelect } = useQuery({
+        queryKey: ["payment"],
+        queryFn: () => getOptions()
+    });
 
     const createMutation = useMutation({
         mutationFn: async (data: WalletFormData) => {
@@ -65,7 +71,7 @@ export function WalletForm({ onClose, dataWal, mode, setIsSaving }: WalletFormTy
         resolver: zodResolver(WalletSchema),
         values: {
             name: dataWal?.name ?? "",
-            paymentCode: dataWal?.paymentCode ?? "",
+            paymentCode: dataWal?.payment.code ?? "",
             description: dataWal?.description ?? "",
             isActive: true,
         }
@@ -81,8 +87,6 @@ export function WalletForm({ onClose, dataWal, mode, setIsSaving }: WalletFormTy
             });
         }
     };
-
-    // console.log()
 
     return (
         <form
@@ -105,20 +109,41 @@ export function WalletForm({ onClose, dataWal, mode, setIsSaving }: WalletFormTy
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="payment">Payment <span className="text-danger">*</span></FieldLabel>
-                            {/* <Select items={items}>
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Theme" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                    {items.map((item) => (
-                                        <SelectItem key={item.value} value={item.value}>
-                                        {item.label}
-                                        </SelectItem>
-                                    ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select> */}
+                            <Controller
+                                control={form.control}
+                                name="paymentCode"
+                                render={({ field }) => (
+                                    <Select
+                                        value={field.value}
+                                        onValueChange={field.onChange}
+                                        items={dataSelect}
+                                        required
+                                    >
+                                        <SelectTrigger className="w-45">
+                                            <SelectValue>
+                                                {dataSelect?.find((x: any) => x.code === field.value)?.name ?? "Choose Payment"}
+                                            </SelectValue>
+                                        </SelectTrigger>
+
+                                        <SelectContent alignItemWithTrigger={false} className="p-2">
+                                            <SelectGroup className="space-y-1">
+                                                <SelectItem value="">-- Choose Payment --</SelectItem>
+                                                {dataSelect?.map((item: any) => (
+                                                    <SelectItem
+                                                        key={item.code}
+                                                        value={item.code}
+                                                        label={item.name}
+                                                        aria-label={item.name}
+                                                    >
+                                                        {item.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            >
+                            </Controller>
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="description">Description <span className="text-text-caption">(Optional)</span></FieldLabel>

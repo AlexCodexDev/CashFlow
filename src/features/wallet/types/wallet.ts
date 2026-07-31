@@ -1,7 +1,10 @@
 export interface WalletTypes {
     code: string,
-    paymentCode: string,
     name: string,
     description: string | null,
-    isActive: boolean
+    isActive: boolean,
+    payment: {
+        code: string,
+        name: string
+    },
 }
