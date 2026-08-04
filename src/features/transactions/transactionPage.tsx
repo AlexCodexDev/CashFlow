@@ -2,20 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { CustomTable } from "@/components/table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteCategory, getCategory } from "@/services/category.service";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CustomDialog } from "@/components/dialog";
 import { toast } from "sonner";
-import { useCategorySocket } from "@/hooks/useCategorySocket";
 import { useDebounce } from "@/hooks/use-debounce";
 import { SkeletonTable } from "@/components/skeletonTable";
 import { IncomePage } from "./components/income";
 import { ExpensePage } from "./components/expense";
+import { Input } from "@/components/ui/input";
+import { TransactionDrawer } from "./components/drawer";
 
 export function TransactionPage() {
     const queryClient = useQueryClient();
@@ -30,10 +28,10 @@ export function TransactionPage() {
     const debouncedCode = useDebounce(searchCode, 500);
     const debouncedName = useDebounce(searchName, 500);
 
-    const { data, isLoading } = useQuery({
-        queryKey: ["category", debouncedCode, debouncedName],
-        queryFn: () => getCategory(debouncedCode, debouncedName)
-    });
+    // const { data, isLoading } = useQuery({
+    //     queryKey: ["category", debouncedCode, debouncedName],
+    //     queryFn: () => getCategory(debouncedCode, debouncedName)
+    // });
 
     // const columns: Column<CategoryTypes>[] = [
     //     {
@@ -121,59 +119,39 @@ export function TransactionPage() {
     //     },
     // ];
 
-    const deleteMutation = useMutation({
-        mutationFn: deleteCategory,
-        onSuccess: (res) => {
-            toast.success(res.message);
+    // const deleteMutation = useMutation({
+    //     mutationFn: deleteCategory,
+    //     onSuccess: (res) => {
+    //         toast.success(res.message);
 
-            queryClient.invalidateQueries({
-                queryKey: ["category"]
-            });
+    //         queryClient.invalidateQueries({
+    //             queryKey: ["category"]
+    //         });
 
-            setOpenDialog(false);
-        },
-        onError: (error) => {
-            toast.error(error.message);
-        }
-    });
+    //         setOpenDialog(false);
+    //     },
+    //     onError: (error) => {
+    //         toast.error(error.message);
+    //     }
+    // });
 
-    const handleDelete = async () => {
-        if(!selectedCode) return;
+    // const handleDelete = async () => {
+    //     if(!selectedCode) return;
 
-        deleteMutation.mutate(selectedCode);
-    }
+    //     deleteMutation.mutate(selectedCode);
+    // }
 
-    useCategorySocket();
+    // useCategorySocket();
 
     return (
         <section className="w-full h-full bg-white rounded-md">
-            {/* <div className="flex-1 px-10 py-7 flex justify-between">
+            <div className="flex-1 px-10 py-7 flex justify-between">
                 <div className="flex gap-1.5">
                     <Field>
-                        <InputGroup className="h-12 rounded-sm">
-                            <InputGroupInput
-                                type="text"
-                                id="search-code-category"
-                                placeholder="Search category code..."
-                                onChange={(e) => setSearchCode(e.target.value)}
-                            />
-                            <InputGroupAddon align="inline-end">
-                                <Search />
-                            </InputGroupAddon>
-                        </InputGroup>
+                        <Input className="h-12 rounded-sm" type="date" id="start-date" />
                     </Field>
                     <Field>
-                        <InputGroup className="h-12 rounded-sm">
-                            <InputGroupInput
-                                type="text"
-                                id="search-name-category"
-                                placeholder="Search category name..."
-                                onChange={(e) => setSearchName(e.target.value)}
-                            />
-                            <InputGroupAddon align="inline-end">
-                                <Search />
-                            </InputGroupAddon>
-                        </InputGroup>
+                        <Input className="h-12 rounded-sm" type="date" id="end-date" />
                     </Field>
                 </div>
                 <div>
@@ -187,11 +165,11 @@ export function TransactionPage() {
                         }}
                     >
                         <Plus data-icon="inline-start" />
-                        Add Category
+                        Add Transaction
                     </Button>
                 </div>
-            </div> */}
-            <div className="p-10 grid grid-cols-2 gap-4">
+            </div>
+            <div className="px-10 grid grid-cols-2 gap-4 h-full">
                 <IncomePage />
                 <ExpensePage />
                 {/* {isLoading ? (
@@ -205,20 +183,20 @@ export function TransactionPage() {
                 )} */}
             </div>
 
-            {/* <CategoryDrawer
+            <TransactionDrawer
                 open={open}
                 onOpenChange={setOpen}
                 title={title}
                 code={selectedCode}
-            /> */}
-            <CustomDialog
+            />
+            {/* <CustomDialog
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}
                 title="Delete Confirmation"
                 subtitle={selectedCode}
                 description="Data will permanent deleted and cannot be retrive."
-                onConfirm={handleDelete}
-            />
+                onConfirm={""}
+            /> */}
         </section>
     );
 }
