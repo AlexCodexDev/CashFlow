@@ -48,23 +48,9 @@ export const sidebarMenus: SidebarItemTypes[] = [
     },
     {
         title: "Transactions",
-        href: "/transactions",
+        href: "/transaction",
         icon: Landmark,
-        description: "",
-        children: [
-            {
-                title: "Income",
-                href: "/income",
-                icon: ArrowDownCircle,
-                description: "Manage all income transactions."
-            },
-            {
-                title: "Expense",
-                href: "/expense",
-                icon: ArrowUpCircle,
-                description: "Manage all expense transactions."
-            }
-        ]
+        description: "Manage all income and expense transactions"
     },
     {
         title: "Budget",
