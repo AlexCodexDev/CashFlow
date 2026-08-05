@@ -192,8 +192,8 @@ export function TransactionPage() {
                 </div>
             </div> */}
             <div className="p-10 grid grid-cols-2 gap-4">
-                <IncomePage />
-                <ExpensePage />
+                {/* <IncomePage /> */}
+                {/* <ExpensePage /> */}
                 {/* {isLoading ? (
                     <SkeletonTable />
                 ) : (
