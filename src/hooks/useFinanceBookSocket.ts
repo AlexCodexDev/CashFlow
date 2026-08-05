@@ -8,7 +8,7 @@ export function useFinanceBookSocket() {
     useEffect(() => {
         const handler = () => {
             queryClient.invalidateQueries({
-                queryKey: ["financeBook"]
+                queryKey: ["financeBooks"]
             });
         }
 

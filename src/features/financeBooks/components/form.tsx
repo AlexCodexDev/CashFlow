@@ -1,6 +1,6 @@
 "use client";
 
-import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
+import { Field, FieldContent, FieldDescription, FieldGroup, FieldLabel, FieldSet, FieldTitle } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -10,73 +10,81 @@ import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { FinanceBookFormTypes } from "../types/formTypes";
-import { FinanceBookBody, FinanceBookSchema } from "@/schemas/financeBook.schema";
+import { FinanceBookBody, FinanceBookParams, FinanceBookSchema } from "@/schemas/financeBook.schema";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { createFinanceBook, updateFinanceBook } from "@/services/finance-book.service";
 
-export function FinanceBookForm({ onClose, dataCat, mode, setIsSaving }: FinanceBookFormTypes) {
+export function FinanceBookForm({ onClose, dataFB, mode, setIsSaving }: FinanceBookFormTypes) {
     const queryClient = useQueryClient();
 
-    // const createMutation = useMutation({
-    //     mutationFn: async (data: FinanceBookBody) => {
-    //         setIsSaving(true);
-    //         return createFinanceBook(data);
-    //     },
-    //     onSuccess: (res) => {
-    //         queryClient.invalidateQueries({
-    //             queryKey: ["financeBooks"]
-    //         });
+    const createMutation = useMutation({
+        mutationFn: async (data: FinanceBookBody) => {
+            setIsSaving(true);
+            return createFinanceBook(data);
+        },
+        onSuccess: (res) => {
+            queryClient.invalidateQueries({
+                queryKey: ["financeBooks"]
+            });
             
-    //         toast.success(res.message);
-    //         form.reset();
-    //         onClose();
-    //     },
-    //     onSettled: () => {
-    //         setIsSaving(false);
-    //     },
-    //     onError: (error) => {
-    //         toast.error(error.message);
-    //     }
-    // });
+            toast.success(res.message);
+            form.reset();
+            onClose();
+        },
+        onSettled: () => {
+            setIsSaving(false);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
 
-    // const updateMutation = useMutation({
-    //     mutationFn: ({
-    //         code,
-    //         data
-    //     }: {
-    //         code: string,
-    //         data: FinanceBookBody
-    //     }) => updateFinanceBook(code, data),
-    //     onSuccess: (res) => {
-    //         queryClient.invalidateQueries({
-    //             queryKey: ["financeBooks"]
-    //         });
+    const updateMutation = useMutation({
+        mutationFn: ({
+            code,
+            data
+        }: {
+            code: FinanceBookParams,
+            data: FinanceBookBody
+        }) => updateFinanceBook(code, data),
+        onSuccess: (res) => {
+            queryClient.invalidateQueries({
+                queryKey: ["financeBooks"]
+            });
             
-    //         toast.success(res.message);
-    //         form.reset();
-    //         onClose();
-    //     },
-    //     onError: (error) => {
-    //         toast.error(error.message);
-    //     }
-    // })
+            toast.success(res.message);
+            form.reset();
+            onClose();
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
 
     const form = useForm<FinanceBookBody>({
         resolver: zodResolver(FinanceBookSchema),
         values: {
-            name: dataCat?.name ?? "",
-            description: dataCat?.description ?? "",
+            name: dataFB?.name ?? "",
+            description: dataFB?.description ?? "",
+            type: dataFB?.type ?? "PERSONAL"
         }
     });
 
     const onSubmit = async (data: FinanceBookBody) => {
         if (mode === "create") {
-            // createMutation.mutate(data);
+            createMutation.mutate(data);
         } else {
-            // updateMutation.mutate({
-            //     code: dataCat.code,
-            //     data
-            // });
+            updateMutation.mutate({
+                code: { code: dataFB.code },
+                data
+            });
         }
     };
+
+    const type = useWatch({
+        control: form.control,
+        name: "type"
+    });
     
     return (
         <form
@@ -87,7 +95,36 @@ export function FinanceBookForm({ onClose, dataCat, mode, setIsSaving }: Finance
                 <FieldSet>
                     <FieldGroup>
                         <Field>
-                            
+                            <FieldLabel htmlFor="name">Type <span className="text-danger">*</span></FieldLabel>
+                            <RadioGroup
+                                defaultValue="plus"
+                                className="max-w-sm"
+                                value={type}
+                                onValueChange={(value) => form.setValue("type", value)}
+                            >
+                                <FieldLabel htmlFor="plus-plan">
+                                    <Field orientation="horizontal">
+                                    <FieldContent>
+                                        <FieldTitle>Personal</FieldTitle>
+                                        <FieldDescription>
+                                            Manage your personal transactions.
+                                        </FieldDescription>
+                                    </FieldContent>
+                                    <RadioGroupItem value="PERSONAL" id="personal" />
+                                    </Field>
+                                </FieldLabel>
+                                <FieldLabel htmlFor="pro-plan">
+                                    <Field orientation="horizontal">
+                                    <FieldContent>
+                                        <FieldTitle>Bussiness</FieldTitle>
+                                        <FieldDescription>
+                                            Manage your bussiness transactions.
+                                        </FieldDescription>
+                                    </FieldContent>
+                                    <RadioGroupItem value="BUSSINESS" id="bussiness" />
+                                    </Field>
+                                </FieldLabel>
+                            </RadioGroup>
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="name">Name <span className="text-danger">*</span></FieldLabel>

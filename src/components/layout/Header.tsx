@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { SidebarMenu } from "../ui/sidebar";
 import { sidebarMenus } from "@/constants/sidebar-menu";
 
 export function Header() {

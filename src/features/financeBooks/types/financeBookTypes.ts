@@ -3,4 +3,5 @@ export interface FinanceBookTypes {
     name: string;
     description: string | null;
     logo: string | null;
+    type: "PERSONAL" | "BUSSINESS";
 }

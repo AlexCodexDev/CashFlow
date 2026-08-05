@@ -1,30 +1,40 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Field } from "@/components/ui/field";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Pencil, Plus, Search, Settings, Trash2 } from "lucide-react";
+import { Building2, CircleUser, Pencil, Plus, Settings } from "lucide-react";
 import { useState } from "react";
 import { CustomTable } from "@/components/table";
 import { Column } from "@/types/table";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { CustomDialog } from "@/components/dialog";
-import { toast } from "sonner";
-import { useDebounce } from "@/hooks/use-debounce";
 import { SkeletonTable } from "@/components/skeletonTable";
 import { getFinanceBook } from "@/services/finance-book.service";
 import { FinanceBookTypes } from "./types/financeBookTypes";
 import { useFinanceBookSocket } from "@/hooks/useFinanceBookSocket";
 import { FinanceBookDrawer } from "./components/drawer";
+import { FinanceBookParams } from "@/schemas/financeBook.schema";
+import { Badge } from "@/components/ui/badge";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getCategory } from "@/services/category.service";
+import { CategoryTypes } from "../category/types/category";
 
 export function FinanceBookPage() {
-    const queryClient = useQueryClient();
-
     const [open, setOpen] = useState(false);
-    const [openDialog, setOpenDialog] = useState(false);
     const [title, setTitle] = useState("");
-    const [selectedCode, setSelectedCode] = useState("");
+    const [selectedCode, setSelectedCode] = useState<FinanceBookParams>();
+    const [typeFilter, setTypeFilter] = useState("");
+
+    const typeBooks = [
+        {
+            label: "Personal",
+            value: "PERSONAL"
+        },
+        {
+            label: "Bussiness",
+            value: "BUSSINESS"
+        }
+    ]
 
     const { data, isLoading } = useQuery({
         queryKey: ["financeBooks"],
@@ -36,6 +46,19 @@ export function FinanceBookPage() {
             key: "code",
             title: "Code",
             className: "font-bold"
+        },
+        {
+            key: "type",
+            title: "Type",
+            className: "font-bold",
+            render: (row) => (
+                <>
+                    <Badge className="opacity-70">
+                        {row.type === "PERSONAL" ? <CircleUser /> : <Building2 />}
+                        {row.type.charAt(0) + row.type.slice(1).toLowerCase()}
+                    </Badge>
+                </>
+            )
         },
         {
             key: "name",
@@ -65,7 +88,7 @@ export function FinanceBookPage() {
                                         size="icon-lg"
                                         onClick={() => {
                                             setTitle("Update");
-                                            setSelectedCode(row.code);
+                                            setSelectedCode({code: row.code});
                                             setOpen(true);
                                         }}
                                         className="transition-colors duration-200 ease-out hover:bg-warning/20"
@@ -75,29 +98,9 @@ export function FinanceBookPage() {
                                 }
                             />
                             <TooltipContent>
-                                Update Category
+                                Update Finance Book
                             </TooltipContent>
                         </Tooltip>
-                        {/* <Tooltip>
-                            <TooltipTrigger
-                                render={
-                                    <Button
-                                        variant="ghost"
-                                        size="icon-lg"
-                                        onClick={() => {
-                                            setSelectedCode(row.code);
-                                            setOpenDialog(true);
-                                        }}
-                                        className="transition-colors duration-200 ease-out hover:bg-danger/20"
-                                    >
-                                        <Trash2 className="text-danger" />
-                                    </Button>
-                                }
-                            />
-                            <TooltipContent>
-                                Delete Category
-                            </TooltipContent>
-                        </Tooltip> */}
                         <Tooltip>
                             <TooltipTrigger
                                 render={
@@ -105,12 +108,12 @@ export function FinanceBookPage() {
                                         variant="ghost"
                                         size="icon-lg"
                                         onClick={() => {
-                                            setSelectedCode(row.code);
+                                            setSelectedCode({code: row.code});
                                             // setOpenDialog(true);
                                         }}
-                                        className="transition-colors duration-200 ease-out hover:bg-danger/20"
+                                        className="transition-colors duration-200 ease-out hover:bg-text-body/20"
                                     >
-                                        <Settings className="text-danger" />
+                                        <Settings className="text-text-body" />
                                     </Button>
                                 }
                             />
@@ -128,47 +131,43 @@ export function FinanceBookPage() {
 
     return (
         <section className="w-full h-full bg-white rounded-md">
-            <div className="flex-1 px-10 py-7 flex justify-end">
-                {/* <div className="flex gap-1.5">
-                    <Field>
-                        <InputGroup className="h-12 rounded-sm">
-                            <InputGroupInput
-                                type="text"
-                                id="search-code-category"
-                                placeholder="Search category code..."
-                                onChange={(e) => setSearchCode(e.target.value)}
-                            />
-                            <InputGroupAddon align="inline-end">
-                                <Search />
-                            </InputGroupAddon>
-                        </InputGroup>
+            <div className="flex-1 px-10 py-7 flex justify-between">
+                <div className="flex gap-1.5">
+                    <Field className="w-45" orientation="horizontal">
+                        <FieldLabel className="text-text-caption">Filter</FieldLabel>
+                        
                     </Field>
-                    <Field>
-                        <InputGroup className="h-12 rounded-sm">
-                            <InputGroupInput
-                                type="text"
-                                id="search-name-category"
-                                placeholder="Search category name..."
-                                onChange={(e) => setSearchName(e.target.value)}
-                            />
-                            <InputGroupAddon align="inline-end">
-                                <Search />
-                            </InputGroupAddon>
-                        </InputGroup>
+                    <Field className="w-45" orientation="horizontal">
+                        <FieldLabel className="text-text-caption">Filter</FieldLabel>
+                        <Select items={typeBooks}>
+                            <SelectTrigger className="w-full rounded-sm">
+                                <SelectValue placeholder="Choose Type" />
+                            </SelectTrigger>
+                            <SelectContent alignItemWithTrigger={false}>
+                                <SelectGroup className="space-y-1">
+                                    <SelectItem value="">Choose Type</SelectItem>
+                                    {typeBooks.map((item) => (
+                                        <SelectItem key={item.value} value={item.value} label={item.label}>
+                                        {item.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </Field>
-                </div> */}
+                </div>
                 <div>
                     <Button
                         size="lg"
                         className="rounded-sm"
                         onClick={() => {
                             setTitle("Create")
-                            setSelectedCode("")
+                            setSelectedCode({code: ""})
                             setOpen(true);
                         }}
                     >
                         <Plus data-icon="inline-start" />
-                        Add finance Books
+                        Add Finance Book
                     </Button>
                 </div>
             </div>
@@ -190,14 +189,6 @@ export function FinanceBookPage() {
                 title={title}
                 code={selectedCode}
             />
-            {/* <CustomDialog
-                open={openDialog}
-                onClose={() => setOpenDialog(false)}
-                title="Delete Confirmation"
-                subtitle={selectedCode}
-                description="Data will permanent deleted and cannot be retrive."
-                onConfirm={handleDelete}
-            /> */}
         </section>
     );
 }

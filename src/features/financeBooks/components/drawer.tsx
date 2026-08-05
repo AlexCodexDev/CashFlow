@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FinanceBookDrawerTypes } from "../types/drawerTypes";
 import { FinanceBookForm } from "./form";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getFinanceBookByCode } from "@/services/finance-book.service";
 
 export function FinanceBookDrawer({ open, onOpenChange, title, code }: FinanceBookDrawerTypes) {
     const isMobile = useIsMobile();
@@ -16,7 +17,7 @@ export function FinanceBookDrawer({ open, onOpenChange, title, code }: FinanceBo
 
     const { data } = useQuery({
         queryKey: ["financeBooks", code],
-        queryFn: () => getCategoryByCode(code!),
+        queryFn: () => getFinanceBookByCode(code!),
         enabled: !!code
     });
     const [isSaving, setIsSaving] = useState(false);
@@ -40,7 +41,7 @@ export function FinanceBookDrawer({ open, onOpenChange, title, code }: FinanceBo
                 <div className="p-4 h-full">
                     <FinanceBookForm
                         onClose={() => onOpenChange(false)}
-                        dataCat={data}
+                        dataFB={data}
                         mode={option ? "create" : "update" }
                         setIsSaving={setIsSaving}
                     />
