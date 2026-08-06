@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Building2, CircleUser, Pencil, Plus, Settings } from "lucide-react";
+import { Building2, CircleUser, Pencil, Plus, Search, Settings } from "lucide-react";
 import { useState } from "react";
 import { CustomTable } from "@/components/table";
 import { Column } from "@/types/table";
@@ -16,14 +16,23 @@ import { FinanceBookParams } from "@/schemas/financeBook.schema";
 import { Badge } from "@/components/ui/badge";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getCategory } from "@/services/category.service";
-import { CategoryTypes } from "../category/types/category";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { cn } from "@/lib/utils";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useRouter } from "next/navigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function FinanceBookPage() {
+    const isMobile = useIsMobile();
+    const router = useRouter();
+
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState("");
     const [selectedCode, setSelectedCode] = useState<FinanceBookParams>();
+    const [searchName, setSearchName] = useState("");
     const [typeFilter, setTypeFilter] = useState("");
+
+    const debouncedName = useDebounce(searchName);
 
     const typeBooks = [
         {
@@ -37,8 +46,8 @@ export function FinanceBookPage() {
     ]
 
     const { data, isLoading } = useQuery({
-        queryKey: ["financeBooks"],
-        queryFn: () => getFinanceBook()
+        queryKey: ["financeBooks", debouncedName, typeFilter],
+        queryFn: () => getFinanceBook(debouncedName, typeFilter)
     });
 
     const columns: Column<FinanceBookTypes>[] = [
@@ -53,9 +62,9 @@ export function FinanceBookPage() {
             className: "font-bold",
             render: (row) => (
                 <>
-                    <Badge className="opacity-70">
+                    <Badge className={cn("opacity-80", row.type === "PERSONAL" ? "bg-success" : "bg-info", isMobile ? "text-xs" : "text-sm")}>
                         {row.type === "PERSONAL" ? <CircleUser /> : <Building2 />}
-                        {row.type.charAt(0) + row.type.slice(1).toLowerCase()}
+                        {row.type}
                     </Badge>
                 </>
             )
@@ -108,8 +117,7 @@ export function FinanceBookPage() {
                                         variant="ghost"
                                         size="icon-lg"
                                         onClick={() => {
-                                            setSelectedCode({code: row.code});
-                                            // setOpenDialog(true);
+                                            router.push(`/finance-book/${row.code}/transaction`);
                                         }}
                                         className="transition-colors duration-200 ease-out hover:bg-text-body/20"
                                     >
@@ -130,25 +138,49 @@ export function FinanceBookPage() {
     useFinanceBookSocket();
 
     return (
-        <section className="w-full h-full bg-white rounded-md">
-            <div className="flex-1 px-10 py-7 flex justify-between">
-                <div className="flex gap-1.5">
-                    <Field className="w-45" orientation="horizontal">
+        <section className="flex flex-col gap-4 h-full">
+            <div className="px-4 py-5 rounded-md bg-white flex flex-col gap-3 lg:flex-row">
+                <div className="h-full flex flex-col gap-2 md:flex-row lg:flex-1">
+                    <Field orientation={isMobile ? "vertical" : "horizontal"}>
                         <FieldLabel className="text-text-caption">Filter</FieldLabel>
-                        
+                        <InputGroup className="h-12 rounded-sm">
+                            <InputGroupInput
+                                type="text"
+                                id="search-name"
+                                placeholder="Search name..."
+                                onChange={(e) => setSearchName(e.target.value)}
+                                className={isMobile ? "text-xs" : "text-sm"}
+                            />
+                            <InputGroupAddon align="inline-end">
+                                <Search />
+                            </InputGroupAddon>
+                        </InputGroup>
                     </Field>
-                    <Field className="w-45" orientation="horizontal">
-                        <FieldLabel className="text-text-caption">Filter</FieldLabel>
-                        <Select items={typeBooks}>
-                            <SelectTrigger className="w-full rounded-sm">
+                    <Field>
+                        <Select
+                            items={typeBooks}
+                            value={typeFilter}
+                            onValueChange={(value) => setTypeFilter(value ?? "")}
+                        >
+                            <SelectTrigger className={cn("h-full py-6 rounded-sm", isMobile ? "text-xs" : "text-sm")}>
                                 <SelectValue placeholder="Choose Type" />
                             </SelectTrigger>
                             <SelectContent alignItemWithTrigger={false}>
                                 <SelectGroup className="space-y-1">
-                                    <SelectItem value="">Choose Type</SelectItem>
+                                    <SelectItem
+                                        value=""
+                                        className={isMobile ? "text-xs" : "text-sm"}
+                                    >
+                                        Choose Type
+                                    </SelectItem>
                                     {typeBooks.map((item) => (
-                                        <SelectItem key={item.value} value={item.value} label={item.label}>
-                                        {item.label}
+                                        <SelectItem
+                                            key={item.value}
+                                            value={item.value}
+                                            label={item.label}
+                                            className={isMobile ? "text-xs" : "text-sm"}
+                                        >
+                                            {item.label}
                                         </SelectItem>
                                     ))}
                                 </SelectGroup>
@@ -156,10 +188,10 @@ export function FinanceBookPage() {
                         </Select>
                     </Field>
                 </div>
-                <div>
+                <div className="flex justify-end items-center xl:flex-1">
                     <Button
                         size="lg"
-                        className="rounded-sm"
+                        className="rounded-sm w-full lg:w-auto lg:h-full"
                         onClick={() => {
                             setTitle("Create")
                             setSelectedCode({code: ""})
@@ -171,24 +203,26 @@ export function FinanceBookPage() {
                     </Button>
                 </div>
             </div>
-            <div className="flex-2 px-10">
-                {isLoading ? (
-                    <SkeletonTable />
-                ) : (
-                    <CustomTable
-                        columns={columns}
-                        data={data ?? []}
-                        rowKey="code"
-                    />
-                )}
-            </div>
+            <div className="flex-2 h-full bg-white rounded-md">
+                <div className="flex-2 px-4">
+                    {isLoading ? (
+                        <SkeletonTable />
+                    ) : (
+                        <CustomTable
+                            columns={columns}
+                            data={data ?? []}
+                            rowKey="code"
+                        />
+                    )}
+                </div>
 
-            <FinanceBookDrawer
-                open={open}
-                onOpenChange={setOpen}
-                title={title}
-                code={selectedCode}
-            />
+                <FinanceBookDrawer
+                    open={open}
+                    onOpenChange={setOpen}
+                    title={title}
+                    code={selectedCode}
+                />
+            </div>
         </section>
     );
 }

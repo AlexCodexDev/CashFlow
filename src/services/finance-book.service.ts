@@ -1,8 +1,13 @@
 import api from "@/lib/axios";
 import { FinanceBookBody, FinanceBookParams } from "@/schemas/financeBook.schema";
 
-export async function getFinanceBook() {
-    const response = await api.get("/finance-book/fetch");
+export async function getFinanceBook(searchName: string, searchType: string) {
+    const response = await api.get("/finance-book/fetch", {
+        params: {
+            searchName,
+            searchType
+        }
+    });
     return response.data;
 }
 

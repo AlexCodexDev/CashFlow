@@ -1,9 +1,12 @@
 import { CustomTableProps } from "@/types/table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function CustomTable<T>({ columns, data, rowKey }: CustomTableProps<T>) {
+    const isMobile = useIsMobile();
+
     return (
-        <Table>
+        <Table className={isMobile ? "text-xs" : "text-sm"}>
             <TableHeader>
                 <TableRow>
                     {columns.map((column) => (

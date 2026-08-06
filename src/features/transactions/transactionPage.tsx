@@ -14,8 +14,11 @@ import { IncomePage } from "./components/income";
 import { ExpensePage } from "./components/expense";
 import { Input } from "@/components/ui/input";
 import { TransactionDrawer } from "./components/drawer";
+import { useParams } from "next/navigation";
 
 export function TransactionPage() {
+    const { code } = useParams<{ code: string }>();
+
     const queryClient = useQueryClient();
 
     const [open, setOpen] = useState(false);
