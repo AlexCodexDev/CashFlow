@@ -31,9 +31,8 @@ export function FinanceBookDrawer({ open, onOpenChange, title, code }: FinanceBo
             }}
             swipeDirection={isMobile ? "down" : "right"}
             disablePointerDismissal={!isSaving}
-            
         >
-            <DrawerContent className={isMobile ? "w-full" : "w-3/12"}>
+            <DrawerContent className={isMobile ? "w-full h-11/12" : "w-5/12 xl:w-3/12"}>
                 <DrawerHeader>
                     <DrawerTitle className="font-semibold">{title} Finance Book</DrawerTitle>
                     <DrawerDescription>{drawerDesc}</DrawerDescription>

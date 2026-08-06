@@ -1,22 +1,27 @@
+import { useIsMobile } from "@/hooks/use-mobile";
 import { SidebarProvider } from "../ui/sidebar";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import Sidebar from "./sidebar/AppSidebar";
+import { useState } from "react";
 
 interface Props {
     children: React.ReactNode
 }
 
-export default function DashboardLayout({ children, }: Props) {
+export default function DashboardLayout({ children }: Props) {
+    const isMobile = useIsMobile();
+    const [open, setOpen] = useState(true);
+
     return (
         <>
-            <SidebarProvider>
+            <SidebarProvider open={open} onOpenChange={setOpen}>
                 <div className="flex min-h-dvh min-w-dvw">
                     <Sidebar />
 
                     <div className="flex flex-1 flex-col px-5 min-w-0">
                         <Header />
-
+                        
                         <main className="flex-1 py-3">
                             {children}
                         </main>

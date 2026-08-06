@@ -5,7 +5,9 @@ import Image from "next/image";
 export default function AppSidebar() {
     return(
         <>
-            <Sidebar>
+            <Sidebar
+                variant="sidebar"
+            >
                 <SidebarHeader>
                     <Image
                         src="/images/logoCashflow.webp"

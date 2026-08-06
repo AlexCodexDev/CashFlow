@@ -139,7 +139,7 @@ export function FinanceBookPage() {
 
     return (
         <section className="flex flex-col gap-4 h-full">
-            <div className="px-4 py-5 rounded-md bg-white flex flex-col gap-3 lg:flex-row">
+            <div className="px-4 py-5 rounded-sm bg-white flex flex-col gap-3 lg:flex-row">
                 <div className="h-full flex flex-col gap-2 md:flex-row lg:flex-1">
                     <Field orientation={isMobile ? "vertical" : "horizontal"}>
                         <FieldLabel className="text-text-caption">Filter</FieldLabel>
@@ -203,7 +203,7 @@ export function FinanceBookPage() {
                     </Button>
                 </div>
             </div>
-            <div className="flex-2 h-full bg-white rounded-md">
+            <div className="flex-2 h-full bg-white rounded-sm">
                 <div className="flex-2 px-4">
                     {isLoading ? (
                         <SkeletonTable />

@@ -13,8 +13,10 @@ import { FinanceBookFormTypes } from "../types/formTypes";
 import { FinanceBookBody, FinanceBookParams, FinanceBookSchema } from "@/schemas/financeBook.schema";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { createFinanceBook, updateFinanceBook } from "@/services/finance-book.service";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function FinanceBookForm({ onClose, dataFB, mode, setIsSaving }: FinanceBookFormTypes) {
+    const isMobile = useIsMobile();
     const queryClient = useQueryClient();
 
     const createMutation = useMutation({
@@ -97,12 +99,12 @@ export function FinanceBookForm({ onClose, dataFB, mode, setIsSaving }: FinanceB
                         <Field>
                             <FieldLabel htmlFor="name">Type <span className="text-danger">*</span></FieldLabel>
                             <RadioGroup
-                                defaultValue="plus"
-                                className="max-w-sm"
+                                defaultValue="PERSONAL"
+                                className="w-full flex flex-row md:flex-col"
                                 value={type}
                                 onValueChange={(value) => form.setValue("type", value)}
                             >
-                                <FieldLabel htmlFor="plus-plan">
+                                <FieldLabel htmlFor="personal-plan">
                                     <Field orientation="horizontal">
                                     <FieldContent>
                                         <FieldTitle>Personal</FieldTitle>
@@ -113,7 +115,7 @@ export function FinanceBookForm({ onClose, dataFB, mode, setIsSaving }: FinanceB
                                     <RadioGroupItem value="PERSONAL" id="personal" />
                                     </Field>
                                 </FieldLabel>
-                                <FieldLabel htmlFor="pro-plan">
+                                <FieldLabel htmlFor="bussiness-plan">
                                     <Field orientation="horizontal">
                                     <FieldContent>
                                         <FieldTitle>Bussiness</FieldTitle>
