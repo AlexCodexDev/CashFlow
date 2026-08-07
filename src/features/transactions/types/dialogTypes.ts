@@ -1,7 +1,5 @@
-export interface TransactionDrawerTypes {
+export interface TransactionDialogTypes {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    title: string;
-    code?: string;
     bookCode: string;
 }

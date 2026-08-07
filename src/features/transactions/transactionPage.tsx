@@ -21,7 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useTransactionSocket } from "@/hooks/useTransactionSocket";
 
 export function TransactionPage() {
-    const { code } = useParams<{ code: string }>();
+    const { code } = useParams<{ code: string }>(); 
     const queryClient = useQueryClient();
 
     const [open, setOpen] = useState(false);
@@ -260,6 +260,7 @@ export function TransactionPage() {
                 onOpenChange={setOpen}
                 title={title}
                 code={selectedCode}
+                bookCode={code}
             />
             {/* <CustomDialog
                 open={openDialog}

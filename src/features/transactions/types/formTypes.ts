@@ -4,5 +4,6 @@ export interface TransactionFormTypes {
     onClose: () => void;
     mode: "create" | "update";
     setIsSaving: (value: boolean) => void;
-    dataTrans: TransactionBody
+    dataTrans: TransactionBody,
+    bookCode: string;
 }

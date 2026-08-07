@@ -5,7 +5,8 @@ import { useState } from "react";
 import { TransactionDrawerTypes } from "../types/drawerTypes";
 import { TransactionForm } from "./form";
 
-export function TransactionDrawer({ open, onOpenChange, title, code }: TransactionDrawerTypes) {
+export function TransactionDrawer({ open, onOpenChange, title, code, bookCode }: TransactionDrawerTypes) {
+    console.log(bookCode);
     const option = title === "Create";
     const drawerDesc = option
         ? "Add transactions."
@@ -39,6 +40,7 @@ export function TransactionDrawer({ open, onOpenChange, title, code }: Transacti
                         dataTrans={data}
                         mode={option ? "create" : "update" }
                         setIsSaving={setIsSaving}
+                        bookCode={bookCode}
                     />
                 </div>
             </DrawerContent>

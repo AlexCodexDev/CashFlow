@@ -181,8 +181,8 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
                     size="lg"
                     title="Cancel"
                     onClick={() => {
-                        onClose(),
-                        form.reset()
+                        onClose();
+                        form.reset();
                     }}
                     disabled={createMutation.isPending || updateMutation.isPending}
                 >Cancel</Button>
