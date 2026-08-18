@@ -3,11 +3,14 @@ export interface TransactionTypes {
     categoryCode: string;
     walletCode: string;
     contectCode: string;
+    categoryName: string;
+    walletName: string;
+    contactName: string;
     name: string;
     amount: number;
     type: "INCOME" | "EXPENSE";
     icon: string | null;
     color: string | null;
     description: string | null;
-    createdAt: string;
+    date: string;
 }

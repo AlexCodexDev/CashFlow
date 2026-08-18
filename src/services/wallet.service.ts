@@ -12,7 +12,12 @@ export async function getWallet(searchCode = "", searchName = "") {
 }
 
 export async function getWalletByCode(code: string) {
-    const response = await api.get(`/wallet/fetch/${code}`);
+    const response = await api.get(`/wallet/fetch-by-code/${code}`);
+    return response.data;
+}
+
+export async function getWalletByFinanceBookCode(code: string) {
+    const response = await api.get(`/wallet/fetch-by-book-code/${code}`);
     return response.data;
 }
 

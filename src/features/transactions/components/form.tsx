@@ -4,41 +4,44 @@ import { Field, FieldContent, FieldDescription, FieldGroup, FieldLabel, FieldSet
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { TransactionFormTypes } from "../types/formTypes";
 import { TransactionBody, TransactionBodySchema } from "@/schemas/transaction.schema";
 import { createTransaction } from "@/services/transaction.service";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getCategory } from "@/services/category.service";
+import { getCategoryByFinanceCode } from "@/services/category.service";
 import { CategoryTypes } from "@/features/category/types/category";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { getWallet } from "@/services/wallet.service";
-import { TransactionDialog } from "./dialog";
+import { getWalletByCode, getWalletByFinanceBookCode } from "@/services/wallet.service";
+import { CategoryDialog } from "./dialogCategory";
 import { useState } from "react";
+import { WalletDialog } from "./dialogWallet";
+import { WalletTypes } from "@/features/wallet/types/wallet";
+import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
+import { NumberInput } from "@/lib/input-number";
 
-export function TransactionForm({ onClose, dataTrans, mode, setIsSaving, bookCode }: TransactionFormTypes) {
+export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: TransactionFormTypes) {
     const queryClient = useQueryClient();
     
-    const [open, setOpen] = useState(false);
+    const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
+    const [openWalletDialog, setOpenWalletDialog] = useState(false);
 
     const { data: dataCategory } = useQuery({
-        queryKey: ["category"],
-        queryFn: () => getCategory()
+        queryKey: ["category", bookCode],
+        queryFn: () => getCategoryByFinanceCode(bookCode),
+        enabled: !!bookCode
     });
 
     const { data: dataWallet } = useQuery({
-        queryKey: ["wallet"],
-        queryFn: () => getWallet()
+        queryKey: ["wallet", bookCode],
+        queryFn: () => getWalletByFinanceBookCode(bookCode),
+        enabled: !!bookCode
     });
-
-    // const { data: dataContact } = useQuery({
-    //     queryKey: ["contact"]
-    // });
 
     // START: Check data
     const hasCategory = dataCategory?.length > 0;
@@ -67,36 +70,14 @@ export function TransactionForm({ onClose, dataTrans, mode, setIsSaving, bookCod
         }
     });
 
-    // const updateMutation = useMutation({
-    //     mutationFn: ({
-    //         code,
-    //         data
-    //     }: {
-    //         code: string,
-    //         data: CategoryFormData
-    //     }) => updateCategory(code, data),
-    //     onSuccess: (res) => {
-    //         queryClient.invalidateQueries({
-    //             queryKey: ["Category"]
-    //         });
-            
-    //         toast.success(res.message);
-    //         form.reset();
-    //         onClose();
-    //     },
-    //     onError: (error) => {
-    //         toast.error(error.message);
-    //     }
-    // })
-
     const form = useForm<TransactionBody>({
         resolver: zodResolver(TransactionBodySchema),
         values: {
             categoryCode: dataTrans?.categoryCode ?? "",
             walletCode: dataTrans?.walletCode ?? "",
-            contactCode: dataTrans?.contactCode ?? "",
+            contactCode: dataTrans?.contactCode ?? undefined,
             name: dataTrans?.name ?? "",
-            type: dataTrans?.type ?? "",
+            type: dataTrans?.type ?? "INCOME",
             amount: dataTrans?.amount ?? "",
             description: dataTrans?.description ?? "",
             icon: dataTrans?.icon ?? "",
@@ -105,67 +86,66 @@ export function TransactionForm({ onClose, dataTrans, mode, setIsSaving, bookCod
     });
 
     const onSubmit = async (data: TransactionBody) => {
-        if (mode === "create") {
-            createMutation.mutate(data);
-        } else {
-            // updateMutation.mutate({
-            //     code: dataCat.code,
-            //     data
-            // });
-        }
+        createMutation.mutate(data);
     };
 
-    // const name = useWatch({
-    //     control: form.control,
-    //     name: "name"
-    // });
+    const categoryItems = dataCategory?.map((item: CategoryTypes) => ({
+        value: item.code,
+        label: item.name
+    })) ?? [];
 
-    // const icon = useWatch({
-    //     control: form.control,
-    //     name: "icon"
-    // });
-
-    // const color = useWatch({
-    //     control: form.control,
-    //     name: "color"
-    // });
+    const walletItems = dataWallet?.map((item: WalletTypes) => ({
+        value: item.code,
+        label: item.name
+    })) ?? [];
     
     return (
         <>
             <form
-                onSubmit={form.handleSubmit(onSubmit, (errors) => (console.log(errors)))}
+                onSubmit={form.handleSubmit(onSubmit, (errors) => (console.log("Error : ", errors)))}
                 className="flex h-full flex-col"
             >
                 <div className="flex-1 overflow-y-auto">
                     <FieldSet>
                         <FieldGroup>
-                            <Field>
-                                <FieldLabel htmlFor="type">Type <span className="text-danger">*</span></FieldLabel>
-                                <RadioGroup defaultValue="INCOME" className="max-w-sm">
-                                    <FieldLabel htmlFor="income-plan">
-                                        <Field orientation="horizontal">
-                                        <FieldContent>
-                                            <FieldTitle>Income</FieldTitle>
-                                            <FieldDescription>
-                                                Insert income transaction.
-                                            </FieldDescription>
-                                        </FieldContent>
-                                        <RadioGroupItem value="INCOME" id="income-plan" />
-                                        </Field>
-                                    </FieldLabel>
-                                    <FieldLabel htmlFor="expense-plan">
-                                        <Field orientation="horizontal">
-                                        <FieldContent>
-                                            <FieldTitle>Expense</FieldTitle>
-                                            <FieldDescription>
-                                                Insert expense transaction.
-                                            </FieldDescription>
-                                        </FieldContent>
-                                        <RadioGroupItem value="EXPENSE" id="expense-plan" />
-                                        </Field>
-                                    </FieldLabel>
-                                </RadioGroup>
-                            </Field>
+                            <Controller
+                                control={form.control}
+                                name="type"
+                                render={({ field, fieldState }) => (
+                                <Field>
+                                    <FieldLabel htmlFor="type">Type <span className="text-danger">*</span></FieldLabel>
+                                    <RadioGroup
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        className="max-w-sm"
+                                    >
+                                        <FieldLabel htmlFor="income-plan">
+                                            <Field orientation="horizontal">
+                                            <FieldContent>
+                                                <FieldTitle>Income</FieldTitle>
+                                                <FieldDescription>
+                                                    Insert income transaction.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                            <RadioGroupItem value="INCOME" id="income-plan" />
+                                            </Field>
+                                        </FieldLabel>
+                                        <FieldLabel htmlFor="expense-plan">
+                                            <Field orientation="horizontal">
+                                            <FieldContent>
+                                                <FieldTitle>Expense</FieldTitle>
+                                                <FieldDescription>
+                                                    Insert expense transaction.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                            <RadioGroupItem value="EXPENSE" id="expense-plan" />
+                                            </Field>
+                                        </FieldLabel>
+                                    </RadioGroup>
+                                </Field>
+                                )}
+                            >
+                            </Controller>
                             <Field>
                                 <FieldLabel htmlFor="name">Name <span className="text-danger">*</span></FieldLabel>
                                 <Input
@@ -177,134 +157,167 @@ export function TransactionForm({ onClose, dataTrans, mode, setIsSaving, bookCod
                                     {...form.register("name")}
                                 />
                             </Field>
-                            <Field>
-                                <FieldLabel>Category <span className="text-danger">*</span></FieldLabel>
-                                <div className="flex flex-row items-center justify-between gap-2">
-                                    <Select items={dataCategory}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Choose Category" />
-                                        </SelectTrigger>
-                                        <SelectContent alignItemWithTrigger={false}>
-                                            <SelectGroup className="px-3 py-2">
-                                                {hasCategory ? (
-                                                    dataCategory.map((item: CategoryTypes) => (
-                                                        <SelectItem key={item.code} value={item.code} label={item.name}>
-                                                            {item.name}
-                                                        </SelectItem>
-                                                    ))
-                                                ) : (
-                                                    <div className="flex items-center justify-between">
-                                                        <p>Category is empty.</p>
-                                                        <Tooltip>
-                                                            <TooltipTrigger render={
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="icon"
-                                                                    className="transition-colors duration-300 bg-success/70 text-white hover:bg-success/90 hover:text-white"
-                                                                    onClick={() => setOpen(true)}
-                                                                >
-                                                                    <PlusCircle />
-                                                                </Button>
-                                                            }>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                <p>Add Category</p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </div>
-                                                )}
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    {hasCategory && (
-                                        <Tooltip>
-                                            <TooltipTrigger render={
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="transition-colors duration-300 bg-success/70 text-white hover:bg-success/90 hover:text-white"
-                                                    onClick={() => setOpen(true)}
-                                                >
-                                                    <PlusCircle />
-                                                </Button>
-                                            }>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>Add Category</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    )}
-                                </div>
-                            </Field>
-                            <Field>
-                                <FieldLabel>Wallet <span className="text-danger">*</span></FieldLabel>
-                                <div className="flex flex-row items-center justify-between gap-2">
-                                    <Select items={dataWallet}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Choose Wallet" />
-                                        </SelectTrigger>
-                                        <SelectContent alignItemWithTrigger={false}>
-                                            <SelectGroup className="px-3 py-2">
-                                                {hasWallet ? (
-                                                    dataWallet.map((item: CategoryTypes) => (
-                                                        <SelectItem key={item.code} value={item.code} label={item.name}>
-                                                            {item.name}
-                                                        </SelectItem>
-                                                    ))
-                                                ) : (
-                                                    <div className="flex items-center justify-between">
-                                                        <p>Wallet is empty.</p>
-                                                        <Tooltip>
-                                                            <TooltipTrigger render={
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="icon"
-                                                                    className="transition-colors duration-300 bg-success/70 text-white hover:bg-success/90 hover:text-white"
-                                                                >
-                                                                    <PlusCircle />
-                                                                </Button>
-                                                            }>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                <p>Add Wallet</p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </div>
-                                                )}
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    {hasWallet && (
-                                        <Tooltip>
-                                            <TooltipTrigger render={
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="transition-colors duration-300 bg-success/70 text-white hover:bg-success/90 hover:text-white"
-                                                >
-                                                    <PlusCircle />
-                                                </Button>
-                                            }>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>Add Wallet</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    )}
-                                </div>
-                            </Field>
-                            <Field>
-                                <FieldLabel htmlFor="amount">Amount <span className="text-danger">*</span></FieldLabel>
-                                <Input
-                                    type="number"
-                                    id="amount"
-                                    autoComplete="off"
-                                    required
-                                    placeholder="Enter amount..."
-                                    className="h-12"
-                                    {...form.register("amount")}
-                                />
-                            </Field>
+                            <Controller
+                                control={form.control}
+                                name="categoryCode"
+                                render={({ field, fieldState }) => (
+                                    <Field>
+                                        <FieldLabel>Category <span className="text-danger">*</span></FieldLabel>
+                                        <div className="flex flex-row items-center justify-between gap-2">
+                                            <Select
+                                                items={categoryItems}
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Choose Category" />
+                                                </SelectTrigger>
+                                                <SelectContent alignItemWithTrigger={false}>
+                                                    <SelectGroup className="px-3 py-2 space-y-2">
+                                                        {hasCategory ? (
+                                                            dataCategory.map((item: CategoryTypes) => (
+                                                                <SelectItem key={item.code} value={item.code} label={item.name}>
+                                                                    {item.name}
+                                                                </SelectItem>
+                                                            ))
+                                                        ) : (
+                                                            <div className="flex items-center justify-between">
+                                                                <p>Category is empty.</p>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger render={
+                                                                        <Button
+                                                                            variant="outline"
+                                                                            size="icon"
+                                                                            className="transition-colors duration-300 bg-success/70 text-white hover:bg-success/90 hover:text-white"
+                                                                            onClick={() => setOpenCategoryDialog(true)}
+                                                                        >
+                                                                            <PlusCircle />
+                                                                        </Button>
+                                                                    }>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <p>Add Category</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </div>
+                                                        )}
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                            {hasCategory && (
+                                                <Tooltip>
+                                                    <TooltipTrigger render={
+                                                        <Button
+                                                            variant="outline"
+                                                            size="icon"
+                                                            className="transition-colors duration-300 bg-success/70 text-white hover:bg-success/90 hover:text-white"
+                                                            onClick={() => setOpenCategoryDialog(true)}
+                                                        >
+                                                            <PlusCircle />
+                                                        </Button>
+                                                    }>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Add Category</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            )}
+                                        </div>
+                                    </Field>
+                                )}
+                            >
+                            </Controller>
+                            <Controller
+                                control={form.control}
+                                name="walletCode"
+                                render={({ field, fieldState }) => (
+                                    <Field>
+                                        <FieldLabel>Wallet <span className="text-danger">*</span></FieldLabel>
+                                        <div className="flex flex-row items-center justify-between gap-2">
+                                            <Select
+                                                items={walletItems}
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Choose Wallet" />
+                                                </SelectTrigger>
+                                                <SelectContent alignItemWithTrigger={false}>
+                                                    <SelectGroup className="px-3 py-2 space-y-2">
+                                                        {hasWallet ? (
+                                                            dataWallet.map((item: CategoryTypes) => (
+                                                                <SelectItem key={item.code} value={item.code} label={item.name}>
+                                                                    {item.name}
+                                                                </SelectItem>
+                                                            ))
+                                                        ) : (
+                                                            <div className="flex items-center justify-between">
+                                                                <p>Wallet is empty.</p>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger render={
+                                                                        <Button
+                                                                            variant="outline"
+                                                                            size="icon"
+                                                                            className="transition-colors duration-300 bg-success/70 text-white hover:bg-success/90 hover:text-white"
+                                                                            onClick={() => setOpenWalletDialog(true)}
+                                                                        >
+                                                                            <PlusCircle />
+                                                                        </Button>
+                                                                    }>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <p>Add Wallet</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </div>
+                                                        )}
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                            {hasWallet && (
+                                                <Tooltip>
+                                                    <TooltipTrigger render={
+                                                        <Button
+                                                            variant="outline"
+                                                            size="icon"
+                                                            className="transition-colors duration-300 bg-success/70 text-white hover:bg-success/90 hover:text-white"
+                                                            onClick={() => setOpenWalletDialog(true)}
+                                                        >
+                                                            <PlusCircle />
+                                                        </Button>
+                                                    }>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Add Wallet</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            )}
+                                        </div>
+                                    </Field>
+                                )}
+                            >
+                            </Controller>
+                            <Controller
+                                control={form.control}
+                                name="amount"
+                                render={({ field }) => (
+                                    <Field>
+                                        <FieldLabel htmlFor="amount">Amount <span className="text-danger">*</span></FieldLabel>
+                                        <InputGroup className="h-12">
+                                            <InputGroupAddon align="inline-start">
+                                                Rp
+                                            </InputGroupAddon>
+                                            <NumberInput
+                                                id="amount"
+                                                placeholder="Enter amount..."
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                            />
+                                        </InputGroup>
+                                    </Field>
+                                )}
+                            >
+                            </Controller>
                             <Field>
                                 <FieldLabel htmlFor="description">Description <span className="text-text-caption">(Optional)</span></FieldLabel>
                                 <Textarea
@@ -374,9 +387,14 @@ export function TransactionForm({ onClose, dataTrans, mode, setIsSaving, bookCod
                     >Cancel</Button>
                 </div>
             </form>
-            <TransactionDialog
-                open={open}
-                onOpenChange={setOpen}
+            <CategoryDialog
+                open={openCategoryDialog}
+                onOpenChange={setOpenCategoryDialog}
+                bookCode={bookCode}
+            />
+            <WalletDialog
+                open={openWalletDialog}
+                onOpenChange={setOpenWalletDialog}
                 bookCode={bookCode}
             />
         </>

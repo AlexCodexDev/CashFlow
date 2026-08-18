@@ -12,7 +12,12 @@ export async function getCategory(searchCode = "", searchName = "") {
 }
 
 export async function getCategoryByCode(code: string) {
-    const response = await api.get(`/category/fetch/${code}`);
+    const response = await api.get(`/category/fetch-by-code/${code}`);
+    return response.data;
+}
+
+export async function getCategoryByFinanceCode(code: string) {
+    const response = await api.get(`/category/fetch-by-book-code/${code}`);
     return response.data;
 }
 

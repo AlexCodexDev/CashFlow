@@ -19,6 +19,9 @@ import { Column } from "@/types/table";
 import { TransactionTypes } from "./types/transaction";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTransactionSocket } from "@/hooks/useTransactionSocket";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { FormatCurrency } from "@/lib/format-currency";
 
 export function TransactionPage() {
     const { code } = useParams<{ code: string }>(); 
@@ -35,15 +38,29 @@ export function TransactionPage() {
     // const debouncedName = useDebounce(searchName, 500);
 
     const { data, isLoading } = useQuery({
-        queryKey: ["category"],
+        queryKey: ["transactions"],
         queryFn: () => getTransaction()
     });
 
+    const dataTransactions = data?.data ?? [];
+    const income = data?.income ?? 0;
+    const expense = data?.expense ?? 0;
+
     const columns: Column<TransactionTypes>[] = [
         {
-            key: "createdAt",
+            key: "date",
             title: "Date",
-            className: "font-bold"
+            className: "font-bold",
+            render: (row) => {
+                const date = new Date(row.date);
+                const formatter = new Intl.DateTimeFormat('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: '2-digit'
+                });
+                
+                return formatter.format(date);
+            }
         },
         {
             key: "name",
@@ -53,27 +70,40 @@ export function TransactionPage() {
         {
             key: "type",
             title: "Type",
-            className: "font-bold"
+            className: "font-bold",
+            render: (row) => (
+                <Badge
+                    className={cn(row.type === "EXPENSE" ? "bg-danger/80" : "bg-primary/80", 'font-semibold px-2 py-3')}
+                >
+                    {row.type.charAt(0) + row.type.slice(1).toLowerCase()}
+                </Badge>
+            )
         },
         {
-            key: "categoryCode",
+            key: "categoryName",
             title: "Category",
             className: "font-bold"
         },
         {
-            key: "walletCode",
+            key: "walletName",
             title: "Wallet",
             className: "font-bold"
         },
         {
-            key: "contactCode",
+            key: "contactName",
             title: "Contact",
-            className: "font-bold"
+            className: "font-bold",
+            render: (row) => (
+                row.contactName || "-"
+            )
         },
         {
-            key: "Amount",
-            title: "Total",
-            className: "font-bold"
+            key: "amount",
+            title: "Amount",
+            className: "font-bold",
+            render: (row) => (
+                FormatCurrency(row.amount)
+            )
         },
         {
             key: "description",
@@ -198,7 +228,7 @@ export function TransactionPage() {
                         >
                             <div className="space-y-1">
                                 <ItemTitle className="text-xs font-semibold">Total Income</ItemTitle>
-                                <ItemDescription className="text-md">Rp100.000.000,00</ItemDescription>
+                                <ItemDescription className="text-md">{FormatCurrency(income)}</ItemDescription>
                             </div>
                             <div>
                                 <div className="flex flex-row justify-end items-center ">
@@ -222,7 +252,7 @@ export function TransactionPage() {
                         >
                             <div className="space-y-1">
                                 <ItemTitle className="text-xs font-semibold">Total Expense</ItemTitle>
-                                <ItemDescription className="text-md">Rp50.000.000,00</ItemDescription>
+                                <ItemDescription className="text-md">{FormatCurrency(expense)}</ItemDescription>
                             </div>
                             <div>
                                 <div className="flex flex-row justify-end items-center ">
@@ -248,7 +278,7 @@ export function TransactionPage() {
                     ) : (
                         <CustomTable
                             columns={columns}
-                            data={data ?? []}
+                            data={dataTransactions}
                             rowKey="code"
                         />
                     )}

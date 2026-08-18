@@ -6,7 +6,6 @@ import { TransactionDrawerTypes } from "../types/drawerTypes";
 import { TransactionForm } from "./form";
 
 export function TransactionDrawer({ open, onOpenChange, title, code, bookCode }: TransactionDrawerTypes) {
-    console.log(bookCode);
     const option = title === "Create";
     const drawerDesc = option
         ? "Add transactions."

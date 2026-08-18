@@ -16,10 +16,8 @@ import { createCategory } from "@/services/category.service";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
-import { WalletFormData, WalletSchema } from "@/schemas/wallet.schema";
 
-export function TransactionDialog({ open, onOpenChange, bookCode }: TransactionDialogTypes) {
-    console.log(bookCode);
+export function CategoryDialog({ open, onOpenChange, bookCode }: TransactionDialogTypes) {
     const queryClient = useQueryClient();
 
     const createMutation = useMutation({
@@ -32,7 +30,7 @@ export function TransactionDialog({ open, onOpenChange, bookCode }: TransactionD
             });
 
             toast.success(res.message);
-            formCategory.reset();
+            form.reset();
             onOpenChange(false);
         },
         onError: (error) => {
@@ -40,7 +38,7 @@ export function TransactionDialog({ open, onOpenChange, bookCode }: TransactionD
         }
     });
 
-    const formCategory = useForm<CategoryFormData>({
+    const form = useForm<CategoryFormData>({
         resolver: zodResolver(CategorySchema),
         values: {
             name: "",
@@ -51,30 +49,22 @@ export function TransactionDialog({ open, onOpenChange, bookCode }: TransactionD
         }
     });
 
-    // const formWallet = useForm<WalletFormData>({
-    //     resolver: zodResolver(WalletSchema),
-    //     values: {
-    //         name: "",
-
-    //     }
-    // })
-
     const onSubmit = async (data: CategoryFormData) => {
         createMutation.mutate(data);
     }
 
     const name = useWatch({
-        control: formCategory.control,
+        control: form.control,
         name: "name"
     });
 
     const icon = useWatch({
-        control: formCategory.control,
+        control: form.control,
         name: "icon"
     });
 
     const color = useWatch({
-        control: formCategory.control,
+        control: form.control,
         name: "color"
     });
 
@@ -85,7 +75,7 @@ export function TransactionDialog({ open, onOpenChange, bookCode }: TransactionD
         >
             <DialogContent className="sm:max-w-sm">
                 <form
-                    onSubmit={formCategory.handleSubmit(onSubmit, (errors) => (console.log(errors)))}
+                    onSubmit={form.handleSubmit(onSubmit, (errors) => (console.log(errors)))}
                 >
                     <DialogHeader>
                         <DialogTitle className="font-semibold">Add Category</DialogTitle>
@@ -104,7 +94,7 @@ export function TransactionDialog({ open, onOpenChange, bookCode }: TransactionD
                                     required
                                     placeholder="Enter name..."
                                     className="h-12"
-                                    {...formCategory.register("name")}
+                                    {...form.register("name")}
                                 />
                             </Field>
                             <Field>
@@ -113,7 +103,7 @@ export function TransactionDialog({ open, onOpenChange, bookCode }: TransactionD
                                 <div className="grid grid-cols-5 gap-2">
                                     <CategoryIconField
                                         value={icon}
-                                        onValueChange={(value) => formCategory.setValue("icon", value)}
+                                        onValueChange={(value) => form.setValue("icon", value)}
                                     />
                                 </div>
                             </Field>
@@ -123,7 +113,7 @@ export function TransactionDialog({ open, onOpenChange, bookCode }: TransactionD
                                 <div className="grid grid-cols-5 gap-2">
                                     <CategoryColorField
                                         value={color}
-                                        onValueChange={(value) => formCategory.setValue("color", value)}
+                                        onValueChange={(value) => form.setValue("color", value)}
                                     />
                                 </div>
                             </Field>
@@ -147,7 +137,7 @@ export function TransactionDialog({ open, onOpenChange, bookCode }: TransactionD
                                     variant="outline" 
                                     onClick={() => {
                                         onOpenChange(false);
-                                        formCategory.reset();
+                                        form.reset();
                                     }}
                                     disabled={createMutation.isPending}
                                 >
