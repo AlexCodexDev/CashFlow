@@ -40,6 +40,7 @@ export function TransactionDrawer({ open, onOpenChange, title, code, bookCode }:
                         mode={option ? "create" : "update" }
                         setIsSaving={setIsSaving}
                         bookCode={bookCode}
+                        code={code || ""}
                     />
                 </div>
             </DrawerContent>

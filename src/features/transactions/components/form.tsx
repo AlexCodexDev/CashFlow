@@ -10,8 +10,8 @@ import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle } from "lucide-react";
 import { TransactionFormTypes } from "../types/formTypes";
-import { TransactionBody, TransactionBodySchema } from "@/schemas/transaction.schema";
-import { createTransaction } from "@/services/transaction.service";
+import { TransactionBody, TransactionBodySchema, TransactionParams } from "@/schemas/transaction.schema";
+import { createTransaction, updateTransaction } from "@/services/transaction.service";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getCategoryByFinanceCode } from "@/services/category.service";
@@ -25,7 +25,7 @@ import { WalletTypes } from "@/features/wallet/types/wallet";
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
 import { NumberInput } from "@/lib/input-number";
 
-export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: TransactionFormTypes) {
+export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode, mode, code }: TransactionFormTypes) {
     const queryClient = useQueryClient();
     
     const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
@@ -70,6 +70,34 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: T
         }
     });
 
+    const updateMutation = useMutation({
+        mutationFn: ({
+            code,
+            data
+        }: {
+            code: string,
+            data: TransactionBody
+        }) => {
+            setIsSaving(true);
+            return updateTransaction(code, data);
+        },
+        onSuccess: (res) => {
+            queryClient.invalidateQueries({
+                queryKey: ["transactions"]
+            });
+
+            toast.success(res.message);
+            form.reset();
+            onClose();
+        },
+        onSettled: () => {
+            setIsSaving(false);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    })
+
     const form = useForm<TransactionBody>({
         resolver: zodResolver(TransactionBodySchema),
         values: {
@@ -86,7 +114,14 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: T
     });
 
     const onSubmit = async (data: TransactionBody) => {
-        createMutation.mutate(data);
+        if(mode === "create") {
+            createMutation.mutate(data);
+        } else {
+            updateMutation.mutate({
+                code,
+                data
+            });
+        }
     };
 
     const categoryItems = dataCategory?.map((item: CategoryTypes) => ({

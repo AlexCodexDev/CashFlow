@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
-import { ChevronUp, ClipboardList, LucideArrowDownCircle, LucideArrowUpCircle, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronUp, ClipboardList, LucideArrowDownCircle, LucideArrowUpCircle, Pencil, Plus, Settings, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CustomDialog } from "@/components/dialog";
@@ -14,7 +14,7 @@ import { TransactionDrawer } from "./components/drawer";
 import { useParams } from "next/navigation";
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { CustomTable } from "@/components/table";
-import { getTransaction } from "@/services/transaction.service";
+import { deleteTransaction, getTransaction } from "@/services/transaction.service";
 import { Column } from "@/types/table";
 import { TransactionTypes } from "./types/transaction";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -167,27 +167,27 @@ export function TransactionPage() {
         },
     ];
 
-    // const deleteMutation = useMutation({
-    //     mutationFn: deleteCategory,
-    //     onSuccess: (res) => {
-    //         toast.success(res.message);
+    const deleteMutation = useMutation({
+        mutationFn: deleteTransaction,
+        onSuccess: (res) => {
+            console.log(res);
+            queryClient.invalidateQueries({
+                queryKey: ["transactions"]
+            });
 
-    //         queryClient.invalidateQueries({
-    //             queryKey: ["category"]
-    //         });
+            toast.success(res.message);
+            setOpenDialog(false);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
 
-    //         setOpenDialog(false);
-    //     },
-    //     onError: (error) => {
-    //         toast.error(error.message);
-    //     }
-    // });
+    const handleDelete = async () => {
+        if(!selectedCode) return;
 
-    // const handleDelete = async () => {
-    //     if(!selectedCode) return;
-
-    //     deleteMutation.mutate(selectedCode);
-    // }
+        deleteMutation.mutate(selectedCode);
+    }
 
     useTransactionSocket();
 
@@ -202,19 +202,33 @@ export function TransactionPage() {
                         <Input className="h-12 rounded-sm" type="date" id="end-date" />
                     </Field>
                 </div>
-                <div>
-                    <Button
-                        size="lg"
-                        className="rounded-sm w-full"
-                        onClick={() => {
-                            setTitle("Create")
-                            setSelectedCode("")
-                            setOpen(true);
-                        }}
-                    >
-                        <Plus data-icon="inline-start" />
-                        Add Transaction
-                    </Button>
+                <div className="flex flex-row justify-end gap-2 w-full h-full">
+                    <div>
+                        <Button
+                            size="lg"
+                            className="rounded-sm w-full h-full"
+                            title="Add Transaction"
+                            onClick={() => {
+                                setTitle("Create")
+                                setSelectedCode("")
+                                setOpen(true);
+                            }}
+                        >
+                            <Plus data-icon="inline-start" />
+                            Add Transaction
+                        </Button>
+                    </div>
+                    <div>
+                        <Button
+                            variant="secondary"
+                            size="lg"
+                            className="rounded-sm w-full h-full"
+                            title="Settings"
+                        >
+                            <Settings data-icon="inline-start" />
+                            Settings
+                        </Button>
+                    </div>
                 </div>
             </div>
             <div className="bg-white flex flex-col gap-2 px-4 py-5 rounded-sm sm:flex-row">
@@ -292,14 +306,14 @@ export function TransactionPage() {
                 code={selectedCode}
                 bookCode={code}
             />
-            {/* <CustomDialog
+            <CustomDialog
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}
                 title="Delete Confirmation"
                 subtitle={selectedCode}
                 description="Data will permanent deleted and cannot be retrive."
-                onConfirm={""}
-            /> */}
+                onConfirm={handleDelete}
+            />
         </section>
     );
 }

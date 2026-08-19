@@ -1,6 +1,7 @@
-import { TransactionBody } from "@/schemas/transaction.schema";
+import { TransactionBody, TransactionParams } from "@/schemas/transaction.schema";
 
 export interface TransactionFormTypes {
+    code: string;
     onClose: () => void;
     mode: "create" | "update";
     setIsSaving: (value: boolean) => void;

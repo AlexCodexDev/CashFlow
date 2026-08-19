@@ -192,6 +192,7 @@ export function FinanceBookPage() {
                     <Button
                         size="lg"
                         className="rounded-sm w-full lg:w-auto lg:h-full"
+                        title="Add Finance Book"
                         onClick={() => {
                             setTitle("Create")
                             setSelectedCode({code: ""})
