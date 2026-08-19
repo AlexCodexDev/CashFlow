@@ -1,9 +1,9 @@
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useQuery } from "@tanstack/react-query";
-import { getCategoryByCode } from "@/services/category.service";
 import { useState } from "react";
 import { TransactionDrawerTypes } from "../types/drawerTypes";
 import { TransactionForm } from "./form";
+import { getTransactionByCode } from "@/services/transaction.service";
 
 export function TransactionDrawer({ open, onOpenChange, title, code, bookCode }: TransactionDrawerTypes) {
     const option = title === "Create";
@@ -12,8 +12,8 @@ export function TransactionDrawer({ open, onOpenChange, title, code, bookCode }:
         : "Update your transaction information.";
 
     const { data } = useQuery({
-        queryKey: ["category", code],
-        queryFn: () => getCategoryByCode(code!),
+        queryKey: ["transactions", code],
+        queryFn: () => getTransactionByCode(code!),
         enabled: !!code
     });
     const [isSaving, setIsSaving] = useState(false);
@@ -33,7 +33,7 @@ export function TransactionDrawer({ open, onOpenChange, title, code, bookCode }:
                     <DrawerTitle className="font-semibold">{title} Transaction</DrawerTitle>
                     <DrawerDescription>{drawerDesc}</DrawerDescription>
                 </DrawerHeader>
-                <div className="p-4 h-full">
+                <div className="px-3 py-4 h-full">
                     <TransactionForm
                         onClose={() => onOpenChange(false)}
                         dataTrans={data}

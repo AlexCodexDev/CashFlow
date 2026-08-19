@@ -3,7 +3,7 @@
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TransactionDialogTypes } from "../types/dialogTypes";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,7 +70,7 @@ export function WalletDialog({ open, onOpenChange, bookCode }: TransactionDialog
         >
             <DialogContent className="sm:max-w-sm">
                 <form
-                    onSubmit={form.handleSubmit(onSubmit, (errors) => (console.log(errors)))}
+                    onSubmit={form.handleSubmit(onSubmit)}
                 >
                     <DialogHeader>
                         <DialogTitle className="font-semibold">Add Wallet</DialogTitle>
@@ -81,34 +81,47 @@ export function WalletDialog({ open, onOpenChange, bookCode }: TransactionDialog
                     <Separator className="mt-4" />
                     <FieldSet className="my-4">
                         <FieldGroup>
-                            <Field>
-                                <FieldLabel htmlFor="name">Name <span className="text-danger">*</span></FieldLabel>
-                                <Input
-                                    id="name"
-                                    autoComplete="off"
-                                    placeholder="Enter name..."
-                                    required
-                                    className="h-12"
-                                    {...form.register("name")}
-                                />
-                            </Field>
                             <Controller
                                 control={form.control}
-                                name="openingBalance"
-                                render={({ field }) => (
+                                name="name"
+                                render={({ field, fieldState }) => (
                                     <Field>
-                                        <FieldLabel htmlFor="openingBalance">Opening Balance <span className="text-danger">*</span></FieldLabel>
-                                        <InputGroup className="h-12">
-                                            <InputGroupAddon align="inline-start">
-                                                Rp
-                                            </InputGroupAddon>
-                                            <NumberInput
-                                                id="openingBalance"
-                                                placeholder="Enter opening balance..."
+                                        <FieldLabel htmlFor="name">Name <span className="text-danger">*</span></FieldLabel>
+                                        <div>
+                                            <Input
+                                                id="name"
+                                                autoComplete="off"
+                                                placeholder="Enter name..."
+                                                required
+                                                className="h-12"
                                                 value={field.value}
                                                 onChange={field.onChange}
                                             />
-                                        </InputGroup>
+                                            <FieldError className="text-danger" errors={[fieldState.error]} />
+                                        </div>
+                                    </Field>
+                                )}
+                            />
+                            <Controller
+                                control={form.control}
+                                name="openingBalance"
+                                render={({ field, fieldState }) => (
+                                    <Field>
+                                        <FieldLabel htmlFor="openingBalance">Opening Balance <span className="text-danger">*</span></FieldLabel>
+                                        <div>
+                                            <InputGroup className="h-12">
+                                                <InputGroupAddon align="inline-start">
+                                                    Rp
+                                                </InputGroupAddon>
+                                                <NumberInput
+                                                    id="openingBalance"
+                                                    placeholder="Enter opening balance..."
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                />
+                                            </InputGroup>
+                                            <FieldError className="text-danger" errors={[fieldState.error]} />
+                                        </div>
                                     </Field>
                                 )}
                             />

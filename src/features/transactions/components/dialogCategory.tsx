@@ -3,12 +3,12 @@
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TransactionDialogTypes } from "../types/dialogTypes";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { CategoryIconField } from "@/features/category/components/iconField";
 import { CategoryColorField } from "@/features/category/components/colorField";
 import { CategoryFieldPreview } from "@/features/category/components/preview";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { CategoryFormData, CategorySchema } from "@/schemas/category.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -86,17 +86,27 @@ export function CategoryDialog({ open, onOpenChange, bookCode }: TransactionDial
                     <Separator className="mt-4" />
                     <FieldSet className="my-4">
                         <FieldGroup>
-                            <Field>
-                                <FieldLabel>Name <span className="text-danger">*</span></FieldLabel>
-                                <Input
-                                    id="name"
-                                    autoComplete="off"
-                                    required
-                                    placeholder="Enter name..."
-                                    className="h-12"
-                                    {...form.register("name")}
-                                />
-                            </Field>
+                            <Controller
+                                control={form.control}
+                                name="name"
+                                render={({ field, fieldState }) => (
+                                    <Field>
+                                        <FieldLabel>Name <span className="text-danger">*</span></FieldLabel>
+                                        <div>
+                                            <Input
+                                                id="name"
+                                                autoComplete="off"
+                                                required
+                                                placeholder="Enter name..."
+                                                className="h-12"
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                            />
+                                            <FieldError className="text-danger" errors={[fieldState.error]} />
+                                        </div>
+                                    </Field>
+                                )}
+                            />
                             <Field>
                                 <FieldLabel htmlFor="icon">Icon <span className="text-text-caption">(Optional)</span></FieldLabel>
                                 <FieldDescription>Mark category with icon</FieldDescription>

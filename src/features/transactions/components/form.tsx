@@ -1,6 +1,6 @@
 "use client";
 
-import { Field, FieldContent, FieldDescription, FieldGroup, FieldLabel, FieldSet, FieldTitle } from "@/components/ui/field";
+import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSet, FieldTitle } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import { CategoryTypes } from "@/features/category/types/category";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getWalletByCode, getWalletByFinanceBookCode } from "@/services/wallet.service";
 import { CategoryDialog } from "./dialogCategory";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { WalletDialog } from "./dialogWallet";
 import { WalletTypes } from "@/features/wallet/types/wallet";
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
@@ -98,65 +98,76 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: T
         value: item.code,
         label: item.name
     })) ?? [];
-    
+
     return (
         <>
             <form
-                onSubmit={form.handleSubmit(onSubmit, (errors) => (console.log("Error : ", errors)))}
+                onSubmit={form.handleSubmit(onSubmit)}
                 className="flex h-full flex-col"
             >
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto px-1">
                     <FieldSet>
                         <FieldGroup>
                             <Controller
                                 control={form.control}
                                 name="type"
                                 render={({ field, fieldState }) => (
-                                <Field>
-                                    <FieldLabel htmlFor="type">Type <span className="text-danger">*</span></FieldLabel>
-                                    <RadioGroup
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        className="max-w-sm"
-                                    >
-                                        <FieldLabel htmlFor="income-plan">
-                                            <Field orientation="horizontal">
-                                            <FieldContent>
-                                                <FieldTitle>Income</FieldTitle>
-                                                <FieldDescription>
-                                                    Insert income transaction.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                            <RadioGroupItem value="INCOME" id="income-plan" />
-                                            </Field>
-                                        </FieldLabel>
-                                        <FieldLabel htmlFor="expense-plan">
-                                            <Field orientation="horizontal">
-                                            <FieldContent>
-                                                <FieldTitle>Expense</FieldTitle>
-                                                <FieldDescription>
-                                                    Insert expense transaction.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                            <RadioGroupItem value="EXPENSE" id="expense-plan" />
-                                            </Field>
-                                        </FieldLabel>
-                                    </RadioGroup>
-                                </Field>
+                                    <Field>
+                                        <FieldLabel htmlFor="type">Type <span className="text-danger">*</span></FieldLabel>
+                                        <RadioGroup
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            className="max-w-sm"
+                                            required
+                                        >
+                                            <FieldLabel htmlFor="income-plan">
+                                                <Field orientation="horizontal">
+                                                <FieldContent>
+                                                    <FieldTitle>Income</FieldTitle>
+                                                    <FieldDescription>
+                                                        Insert income transaction.
+                                                    </FieldDescription>
+                                                </FieldContent>
+                                                <RadioGroupItem value="INCOME" id="income-plan" />
+                                                </Field>
+                                            </FieldLabel>
+                                            <FieldLabel htmlFor="expense-plan">
+                                                <Field orientation="horizontal">
+                                                <FieldContent>
+                                                    <FieldTitle>Expense</FieldTitle>
+                                                    <FieldDescription>
+                                                        Insert expense transaction.
+                                                    </FieldDescription>
+                                                </FieldContent>
+                                                <RadioGroupItem value="EXPENSE" id="expense-plan" />
+                                                </Field>
+                                            </FieldLabel>
+                                        </RadioGroup>
+                                        <FieldError className="text-danger" errors={[fieldState.error]} />
+                                    </Field>
                                 )}
-                            >
-                            </Controller>
-                            <Field>
-                                <FieldLabel htmlFor="name">Name <span className="text-danger">*</span></FieldLabel>
-                                <Input
-                                    id="name"
-                                    autoComplete="off"
-                                    required
-                                    placeholder="Enter name..."
-                                    className="h-12"
-                                    {...form.register("name")}
-                                />
-                            </Field>
+                            />
+                            <Controller
+                                control={form.control}
+                                name="name"
+                                render={({ field, fieldState }) => (
+                                    <Field>
+                                        <FieldLabel htmlFor="name">Name <span className="text-danger">*</span></FieldLabel>
+                                        <div>
+                                            <Input
+                                                id="name"
+                                                autoComplete="off"
+                                                required
+                                                placeholder="Enter name..."
+                                                className="h-12"
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                            />
+                                            <FieldError className="text-danger" errors={[fieldState.error]} />
+                                        </div>
+                                    </Field>
+                                )}
+                            />
                             <Controller
                                 control={form.control}
                                 name="categoryCode"
@@ -168,6 +179,7 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: T
                                                 items={categoryItems}
                                                 value={field.value}
                                                 onValueChange={field.onChange}
+                                                required
                                             >
                                                 <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Choose Category" />
@@ -204,6 +216,7 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: T
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
+                                            <FieldError className="text-danger" errors={[fieldState.error]} />
                                             {hasCategory && (
                                                 <Tooltip>
                                                     <TooltipTrigger render={
@@ -225,8 +238,7 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: T
                                         </div>
                                     </Field>
                                 )}
-                            >
-                            </Controller>
+                            />
                             <Controller
                                 control={form.control}
                                 name="walletCode"
@@ -238,8 +250,9 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: T
                                                 items={walletItems}
                                                 value={field.value}
                                                 onValueChange={field.onChange}
+                                                required
                                             >
-                                                <SelectTrigger className="w-full">
+                                                <SelectTrigger className="w-full h-12">
                                                     <SelectValue placeholder="Choose Wallet" />
                                                 </SelectTrigger>
                                                 <SelectContent alignItemWithTrigger={false}>
@@ -274,6 +287,7 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: T
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
+                                            <FieldError className="text-danger" errors={[fieldState.error]} />
                                             {hasWallet && (
                                                 <Tooltip>
                                                     <TooltipTrigger render={
@@ -295,8 +309,7 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: T
                                         </div>
                                     </Field>
                                 )}
-                            >
-                            </Controller>
+                            />
                             <Controller
                                 control={form.control}
                                 name="amount"
@@ -310,14 +323,15 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode }: T
                                             <NumberInput
                                                 id="amount"
                                                 placeholder="Enter amount..."
+                                                autoComplete="off"
+                                                required
                                                 value={field.value}
                                                 onChange={field.onChange}
                                             />
                                         </InputGroup>
                                     </Field>
                                 )}
-                            >
-                            </Controller>
+                            />
                             <Field>
                                 <FieldLabel htmlFor="description">Description <span className="text-text-caption">(Optional)</span></FieldLabel>
                                 <Textarea

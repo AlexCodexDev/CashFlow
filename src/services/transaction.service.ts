@@ -6,6 +6,11 @@ export async function getTransaction() {
     return response.data;
 }
 
+export async function getTransactionByCode(code: string) {
+    const response = await api.get(`/transaction/fetch-by-code/${code}`);
+    return response.data;
+}
+
 export async function createTransaction(data: TransactionBody) {
     const response = await api.post("/transaction/create", data);
     return response.data;
