@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
-import { ChevronUp, ClipboardList, LucideArrowDownCircle, LucideArrowUpCircle, Pencil, Plus, Settings, Trash2 } from "lucide-react";
+import { BookUser, ChevronUp, ClipboardList, Logs, LucideArrowDownCircle, LucideArrowUpCircle, Pencil, Plus, Settings, Trash2, WalletMinimal } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CustomDialog } from "@/components/dialog";
@@ -22,6 +22,8 @@ import { useTransactionSocket } from "@/hooks/useTransactionSocket";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { FormatCurrency } from "@/lib/format-currency";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { CategoryDrawer } from "../category/components/drawer";
 
 export function TransactionPage() {
     const { code } = useParams<{ code: string }>(); 
@@ -29,6 +31,10 @@ export function TransactionPage() {
 
     const [open, setOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
+    const [openCategoryDrawer, setOpenCategoryDrawer] = useState(false);
+    const [openWalletDrawer, setOpenWalletDrawer] = useState(false);
+    const [openContactDrawer, setOpenContactDrawer] = useState(false);
+
     const [searchCode, setSearchCode] = useState("");
     const [searchName, setSearchName] = useState("");
     const [title, setTitle] = useState("");
@@ -219,15 +225,54 @@ export function TransactionPage() {
                         </Button>
                     </div>
                     <div>
-                        <Button
-                            variant="secondary"
-                            size="lg"
-                            className="rounded-sm w-full h-full"
-                            title="Settings"
-                        >
-                            <Settings data-icon="inline-start" />
-                            Settings
-                        </Button>
+                        <DropdownMenu>
+                            <Tooltip>
+                                <TooltipTrigger
+                                    render={
+                                        <DropdownMenuTrigger
+                                            render={
+                                                <Button
+                                                    variant="secondary"
+                                                    size="lg"
+                                                    className="rounded-sm w-full h-full"
+                                                    // title="Settings"
+                                                >
+                                                    <Settings />
+                                                </Button>
+                                            }
+                                        />
+                                    }
+                                />
+                                <TooltipContent>
+                                    <p>Settings</p>
+                                </TooltipContent>
+                            </Tooltip>
+                            <DropdownMenuContent
+                                className="px-2 py-3 w-30"
+                            >
+                                <DropdownMenuGroup className="space-y-1">
+                                    <DropdownMenuLabel>Settings</DropdownMenuLabel>
+                                    <DropdownMenuItem
+                                        onClick={() => setOpenCategoryDrawer(true)}
+                                    >
+                                        <Logs />
+                                        Category
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => setOpenWalletDrawer(true)}
+                                    >
+                                        <WalletMinimal />
+                                        Wallet
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => setOpenContactDrawer(true)}
+                                    >
+                                        <BookUser />
+                                        Contact
+                                    </DropdownMenuItem>
+                                </DropdownMenuGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
             </div>
@@ -313,6 +358,10 @@ export function TransactionPage() {
                 subtitle={selectedCode}
                 description="Data will permanent deleted and cannot be retrive."
                 onConfirm={handleDelete}
+            />
+            <CategoryDrawer
+                open={openCategoryDrawer}
+                onOpenChange={() => setOpenCategoryDrawer(false)}
             />
         </section>
     );

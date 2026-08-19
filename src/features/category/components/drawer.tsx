@@ -1,44 +1,53 @@
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import type { CategoryDrawerTypes } from "../types/drawerTypes";
-import { CategoryForm } from "./form";
-import { useQuery } from "@tanstack/react-query";
-import { getCategoryByCode } from "@/services/category.service";
-import { useState } from "react";
+import { CustomTable } from "@/components/table";
+import { TransactionTypes } from "@/features/transactions/types/transaction";
+import { Column } from "@/types/table";
 
-export function CategoryDrawer({ open, onOpenChange, title, code }: CategoryDrawerTypes) {
-    const option = title === "Create";
-    const drawerDesc = option
-        ? "Add a new category to organize your transactions."
-        : "Update your category information.";
-
-    const { data } = useQuery({
-        queryKey: ["category", code],
-        queryFn: () => getCategoryByCode(code!),
-        enabled: !!code
-    });
-    const [isSaving, setIsSaving] = useState(false);
+export function CategoryDrawer({ open, onOpenChange }: CategoryDrawerTypes) {
+    const columns: Column<TransactionTypes>[] = [
+        {
+            key: "code",
+            title: "Code",
+            className: "font-bold"
+        },
+        {
+            key: "name",
+            title: "Name",
+            className: "font-bold"
+        },
+        {
+            key: "actions",
+            title: "Actions",
+            className: "text-right font-bold",
+            render: (row) => (
+                <>
+                    <div className="space-x-1 text-right">
+                        
+                    </div>
+                </>
+            )
+        },
+    ];
 
     return (
         <Drawer
             open={open}
             onOpenChange={(value) => {
-                if(isSaving && !value) return;
                 onOpenChange(value);
             }}
             swipeDirection="right"
-            disablePointerDismissal={!isSaving}
         >
             <DrawerContent className="w-3/12">
                 <DrawerHeader>
-                    <DrawerTitle className="font-semibold">{title} Category</DrawerTitle>
-                    <DrawerDescription>{drawerDesc}</DrawerDescription>
+                    <DrawerTitle className="font-semibold">Manage Category</DrawerTitle>
+                    <DrawerDescription>Manage your transaction with category.</DrawerDescription>
                 </DrawerHeader>
                 <div className="p-4 h-full">
-                    <CategoryForm
-                        onClose={() => onOpenChange(false)}
-                        dataCat={data}
-                        mode={option ? "create" : "update" }
-                        setIsSaving={setIsSaving}
+                    <CustomTable
+                        columns={columns}
+                        data={[]}
+                        rowKey="code"
                     />
                 </div>
             </DrawerContent>
