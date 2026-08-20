@@ -88,7 +88,7 @@ export function FinanceBookPage() {
             className: "text-right font-bold",
             render: (row) => (
                 <>
-                    <div className="space-x-1 text-right">
+                    <div className="text-right">
                         <Tooltip>
                             <TooltipTrigger
                                 render={

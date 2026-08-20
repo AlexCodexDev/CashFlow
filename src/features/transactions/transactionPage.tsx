@@ -7,7 +7,6 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CustomDialog } from "@/components/dialog";
 import { toast } from "sonner";
-import { useDebounce } from "@/hooks/use-debounce";
 import { SkeletonTable } from "@/components/skeletonTable";
 import { Input } from "@/components/ui/input";
 import { TransactionDrawer } from "./components/drawer";
@@ -26,7 +25,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { CategoryDrawer } from "../category/components/drawer";
 
 export function TransactionPage() {
-    const { code } = useParams<{ code: string }>(); 
+    const { code } = useParams<{ code: string }>();
     const queryClient = useQueryClient();
 
     const [open, setOpen] = useState(false);
@@ -35,13 +34,8 @@ export function TransactionPage() {
     const [openWalletDrawer, setOpenWalletDrawer] = useState(false);
     const [openContactDrawer, setOpenContactDrawer] = useState(false);
 
-    const [searchCode, setSearchCode] = useState("");
-    const [searchName, setSearchName] = useState("");
     const [title, setTitle] = useState("");
     const [selectedCode, setSelectedCode] = useState("");
-
-    // const debouncedCode = useDebounce(searchCode, 500);
-    // const debouncedName = useDebounce(searchName, 500);
 
     const { data, isLoading } = useQuery({
         queryKey: ["transactions"],
@@ -176,7 +170,6 @@ export function TransactionPage() {
     const deleteMutation = useMutation({
         mutationFn: deleteTransaction,
         onSuccess: (res) => {
-            console.log(res);
             queryClient.invalidateQueries({
                 queryKey: ["transactions"]
             });
@@ -191,7 +184,6 @@ export function TransactionPage() {
 
     const handleDelete = async () => {
         if(!selectedCode) return;
-
         deleteMutation.mutate(selectedCode);
     }
 
@@ -202,17 +194,17 @@ export function TransactionPage() {
             <div className="px-4 py-5 rounded-sm bg-white flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
                 <div className="flex flex-col gap-1.5 md:flex-row">
                     <Field>
-                        <Input className="h-12 rounded-sm" type="date" id="start-date" />
+                        <Input className="h-12 rounded-sm text-sm md:text-md" type="date" id="start-date" />
                     </Field>
                     <Field>
-                        <Input className="h-12 rounded-sm" type="date" id="end-date" />
+                        <Input className="h-12 rounded-sm text-sm md:text-md" type="date" id="end-date" />
                     </Field>
                 </div>
-                <div className="flex flex-row justify-end gap-2 w-full h-full">
+                <div className="w-full h-full flex flex-col gap-2 md:flex-row md:justify-end">
                     <div>
                         <Button
                             size="lg"
-                            className="rounded-sm w-full h-full"
+                            className="rounded-sm w-full md:h-full"
                             title="Add Transaction"
                             onClick={() => {
                                 setTitle("Create")
@@ -234,8 +226,7 @@ export function TransactionPage() {
                                                 <Button
                                                     variant="secondary"
                                                     size="lg"
-                                                    className="rounded-sm w-full h-full"
-                                                    // title="Settings"
+                                                    className="rounded-sm w-full md:h-full"
                                                 >
                                                     <Settings />
                                                 </Button>
@@ -248,24 +239,33 @@ export function TransactionPage() {
                                 </TooltipContent>
                             </Tooltip>
                             <DropdownMenuContent
-                                className="px-2 py-3 w-30"
+                                className="px-2 py-3 md:w-30"
                             >
-                                <DropdownMenuGroup className="space-y-1">
+                                <DropdownMenuGroup className="space-y-2 md:space-y-1">
                                     <DropdownMenuLabel>Settings</DropdownMenuLabel>
                                     <DropdownMenuItem
-                                        onClick={() => setOpenCategoryDrawer(true)}
+                                        onClick={() => {
+                                            setOpenCategoryDrawer(true);
+                                            setSelectedCode(code);
+                                        }}
                                     >
                                         <Logs />
                                         Category
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
-                                        onClick={() => setOpenWalletDrawer(true)}
+                                        onClick={() => {
+                                            setOpenWalletDrawer(true);
+                                            setSelectedCode(code);
+                                        }}
                                     >
                                         <WalletMinimal />
                                         Wallet
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
-                                        onClick={() => setOpenContactDrawer(true)}
+                                        onClick={() => {
+                                            setOpenContactDrawer(true);
+                                            setSelectedCode(code);
+                                        }}
                                     >
                                         <BookUser />
                                         Contact
@@ -362,6 +362,7 @@ export function TransactionPage() {
             <CategoryDrawer
                 open={openCategoryDrawer}
                 onOpenChange={() => setOpenCategoryDrawer(false)}
+                code={code}
             />
         </section>
     );

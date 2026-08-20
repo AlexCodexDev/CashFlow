@@ -137,6 +137,7 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode, mod
     return (
         <>
             <form
+                id="transaction-form"
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="flex h-full flex-col"
             >
@@ -194,7 +195,7 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode, mod
                                                 autoComplete="off"
                                                 required
                                                 placeholder="Enter name..."
-                                                className="h-12"
+                                                className="h-12 text-sm md:text-md"
                                                 value={field.value}
                                                 onChange={field.onChange}
                                             />
@@ -220,10 +221,15 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode, mod
                                                     <SelectValue placeholder="Choose Category" />
                                                 </SelectTrigger>
                                                 <SelectContent alignItemWithTrigger={false}>
-                                                    <SelectGroup className="px-3 py-2 space-y-2">
+                                                    <SelectGroup className="px-3 py-2 space-y-2 text-sm md:text-md">
                                                         {hasCategory ? (
                                                             dataCategory.map((item: CategoryTypes) => (
-                                                                <SelectItem key={item.code} value={item.code} label={item.name}>
+                                                                <SelectItem
+                                                                    key={item.code}
+                                                                    value={item.code}
+                                                                    label={item.name}
+                                                                    className="text-sm md:text-md"
+                                                                >
                                                                     {item.name}
                                                                 </SelectItem>
                                                             ))
@@ -291,10 +297,15 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode, mod
                                                     <SelectValue placeholder="Choose Wallet" />
                                                 </SelectTrigger>
                                                 <SelectContent alignItemWithTrigger={false}>
-                                                    <SelectGroup className="px-3 py-2 space-y-2">
+                                                    <SelectGroup className="px-3 py-2 space-y-2 text-sm md:text-md">
                                                         {hasWallet ? (
                                                             dataWallet.map((item: CategoryTypes) => (
-                                                                <SelectItem key={item.code} value={item.code} label={item.name}>
+                                                                <SelectItem
+                                                                    key={item.code}
+                                                                    value={item.code}
+                                                                    label={item.name}
+                                                                    className="text-sm md:text-md"
+                                                                >
                                                                     {item.name}
                                                                 </SelectItem>
                                                             ))
@@ -359,6 +370,7 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode, mod
                                                 id="amount"
                                                 placeholder="Enter amount..."
                                                 autoComplete="off"
+                                                className="text-sm md:text-md"
                                                 required
                                                 value={field.value}
                                                 onChange={field.onChange}
@@ -372,7 +384,7 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode, mod
                                 <Textarea
                                     id="description"
                                     placeholder="Enter description..."
-                                    className="h-26"
+                                    className="h-26 text-sm md:text-md"
                                     {...form.register("description")}
                                 />
                             </Field>
@@ -409,31 +421,6 @@ export function TransactionForm({ onClose, dataTrans, setIsSaving, bookCode, mod
                             </Field> */}
                         </FieldGroup>
                     </FieldSet>
-                </div>
-
-                <div className="flex flex-col justify-between gap-2">
-                    <Button
-                        type="submit"
-                        size="lg"
-                        title="Submit"
-                        // disabled={createMutation.isPending || updateMutation.isPending}
-                    >
-                        {/* {(createMutation.isPending || updateMutation.isPending) && (
-                            <Loader2 className="size-4 animate-spin" />
-                        )} */}
-                        Submit
-                    </Button>
-                    <Button
-                        variant="outline"
-                        type="button"
-                        size="lg"
-                        title="Cancel"
-                        onClick={() => {
-                            onClose(),
-                            form.reset()
-                        }}
-                        // disabled={createMutation.isPending || updateMutation.isPending}
-                    >Cancel</Button>
                 </div>
             </form>
             <CategoryDialog

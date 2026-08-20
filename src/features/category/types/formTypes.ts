@@ -1,7 +1,7 @@
 import { CategoryTypes } from "./category";
 export interface CategoryFormTypes {
-    onClose: () => void;
     dataCat: CategoryTypes;
-    mode: "create" | "update";
-    setIsSaving: (value: boolean) => void;
+    isCreate: boolean;
+    bookCode: string;
+    onClose: () => void;
 }

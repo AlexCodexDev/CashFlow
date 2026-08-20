@@ -1,13 +1,13 @@
 "use client";
 
-import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CategoryIconField } from "./iconField";
 import { CategoryColorField } from "./colorField";
 import { CategoryFieldPreview } from "./preview";
 import { Button } from "@/components/ui/button";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { CategoryFormData, CategorySchema } from "@/schemas/category.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CategoryFormTypes } from "../types/formTypes";
@@ -15,13 +15,13 @@ import { toast } from "sonner";
 import { createCategory, updateCategory } from "@/services/category.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
-export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFormTypes) {
+export function CategoryForm({ dataCat, isCreate, bookCode, onClose }: CategoryFormTypes) {
     const queryClient = useQueryClient();
 
     const createMutation = useMutation({
         mutationFn: async (data: CategoryFormData) => {
-            setIsSaving(true);
             return createCategory(data);
         },
         onSuccess: (res) => {
@@ -32,9 +32,6 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
             toast.success(res.message);
             form.reset();
             onClose();
-        },
-        onSettled: () => {
-            setIsSaving(false);
         },
         onError: (error) => {
             toast.error(error.message);
@@ -67,6 +64,7 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
         resolver: zodResolver(CategorySchema),
         values: {
             name: dataCat?.name ?? "",
+            financeBookCode: dataCat?.financeBookCode ?? bookCode,
             description: dataCat?.description ?? "",
             icon: dataCat?.icon ?? "",
             color: dataCat?.color ?? "",
@@ -75,7 +73,7 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
     });
 
     const onSubmit = async (data: CategoryFormData) => {
-        if (mode === "create") {
+        if (isCreate) {
             createMutation.mutate(data);
         } else {
             updateMutation.mutate({
@@ -102,36 +100,49 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
     
     return (
         <form
-            onSubmit={form.handleSubmit(onSubmit, (errors) => (console.log(errors)))}
-            className="flex h-full flex-col"
+            id="category-form"
+            onSubmit={form.handleSubmit(onSubmit, (error) => console.log(error))}
+            className="w-full space-y-3"
         >
-            <div className="flex-1 overflow-y-auto">
+            <Separator />
+            <div className="flex-1 overflow-y-auto px-1">
                 <FieldSet>
                     <FieldGroup>
-                        <Field>
-                            <FieldLabel htmlFor="name">Name <span className="text-danger">*</span></FieldLabel>
-                            <Input
-                                id="name"
-                                autoComplete="off"
-                                required
-                                placeholder="Enter name..."
-                                className="h-12"
-                                {...form.register("name")}
-                            />
-                        </Field>
+                        <Controller
+                            control={form.control}
+                            name="name"
+                            render={({ field, fieldState }) => 
+                                <Field>
+                                    <FieldLabel htmlFor="name">Name <span className="text-danger">*</span></FieldLabel>
+                                    <Input
+                                        id="name"
+                                        autoComplete="off"
+                                        required
+                                        placeholder="Enter name..."
+                                        className="h-12 text-sm md:text-md"
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    />
+                                    <FieldError
+                                        className="text-danger"
+                                        errors={[fieldState.error]}
+                                    />
+                                </Field>
+                            }
+                        />
                         <Field>
                             <FieldLabel htmlFor="description">Description <span className="text-text-caption">(Optional)</span></FieldLabel>
                             <Textarea
                                 id="description"
                                 placeholder="Enter description..."
-                                className="h-26"
+                                className="h-26 text-sm md:text-md"
                                 {...form.register("description")}
                             />
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="icon">Icon <span className="text-text-caption">(Optional)</span></FieldLabel>
                             <FieldDescription>Mark category with icon</FieldDescription>
-                            <div className="grid grid-cols-5 gap-2">
+                            <div className="grid grid-cols-4 md:grid-cols-5 gap-2">
                                 <CategoryIconField
                                     value={icon}
                                     onValueChange={(value) => form.setValue("icon", value)}
@@ -141,7 +152,7 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
                         <Field>
                             <FieldLabel htmlFor="color">Color <span className="text-text-caption">(Optional)</span></FieldLabel>
                             <FieldDescription>Mark category with color</FieldDescription>
-                            <div className="grid grid-cols-5 gap-2">
+                            <div className="grid grid-cols-4 md:grid-cols-5 gap-2">
                                 <CategoryColorField
                                     value={color}
                                     onValueChange={(value) => form.setValue("color", value)}
@@ -161,31 +172,6 @@ export function CategoryForm({ onClose, dataCat, mode, setIsSaving }: CategoryFo
                         </Field>
                     </FieldGroup>
                 </FieldSet>
-            </div>
-
-            <div className="flex flex-col justify-between gap-2">
-                <Button
-                    type="submit"
-                    size="lg"
-                    title="Submit"
-                    disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                    {(createMutation.isPending || updateMutation.isPending) && (
-                        <Loader2 className="size-4 animate-spin" />
-                    )}
-                    Submit
-                </Button>
-                <Button
-                    variant="outline"
-                    type="button"
-                    size="lg"
-                    title="Cancel"
-                    onClick={() => {
-                        onClose();
-                        form.reset();
-                    }}
-                    disabled={createMutation.isPending || updateMutation.isPending}
-                >Cancel</Button>
             </div>
         </form>
     );

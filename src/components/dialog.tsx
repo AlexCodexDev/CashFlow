@@ -17,7 +17,7 @@ export function CustomDialog({ open, onClose, title, subtitle, description, onCo
                     <p>Code: {subtitle}</p>
                     <p>{description}</p>
                 </div>
-                <DialogFooter className="sm:justify-start">
+                <DialogFooter className="justify-end flex-col md:flex-row">
                     <Button type="button" className="bg-danger hover:bg-danger" onClick={onConfirm}>Delete</Button>
                     <DialogClose render={<Button type="button" variant="outline" onClick={onClose}>Close</Button>} />
                 </DialogFooter>

@@ -16,8 +16,13 @@ export async function getCategoryByCode(code: string) {
     return response.data;
 }
 
-export async function getCategoryByFinanceCode(code: string) {
-    const response = await api.get(`/category/fetch-by-book-code/${code}`);
+export async function getCategoryByFinanceCode(code: string, searchCode = "", searchName = "") {
+    const response = await api.get(`/category/fetch-by-book-code/${code}`, {
+        params: {
+            searchCode,
+            searchName
+        }
+    });
     return response.data;
 }
 

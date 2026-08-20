@@ -12,7 +12,7 @@ export function CategoryFieldPreview({ iconValue, colorValue, categoryName, icon
     const isDefault = previewColor === "bg-background";
     const bgColorSize = bgSize || "h-14 w-14";
     const icnSize = iconSize || "size-6";
-    const txtSize = textSize || "text-lg font-medium";
+    const txtSize = textSize || "text-lg font-medium";  
 
     return (
         <>
@@ -30,7 +30,7 @@ export function CategoryFieldPreview({ iconValue, colorValue, categoryName, icon
                         </motion.div>
                     </AnimatePresence>
                 </div>
-                <div className={txtSize}>
+                <div className={cn(txtSize, "text-sm md:text-md")}>
                     {previewName}
                 </div>
             </div>
